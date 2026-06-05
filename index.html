@@ -95,6 +95,9 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
 .findcard .fm{font-size:12px;color:var(--text-soft)}
 .findsev{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:9999px;background:rgba(245,166,35,.15);color:#9a6a00;display:inline-block;margin-top:4px}
 .findsev.urgent{background:rgba(239,68,68,.12);color:var(--bad-deep)}.findsev.info{background:var(--cy-50);color:var(--brand-ink)}
+.aibox{margin-top:8px;background:var(--cy-50);border:1px solid var(--cy-200);border-radius:9px;padding:8px 10px;font-size:12.5px;color:var(--ink-900);line-height:1.4}
+.aibtn{margin-top:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--grad-current);border:none;border-radius:9999px;padding:7px 13px;cursor:pointer}
+.aibtn:disabled{opacity:.6}
 
 /* TEAM */
 .member{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--e2);margin-bottom:10px;cursor:pointer}
@@ -379,9 +382,16 @@ async function loadFindings(){
     let thumb="";
     if(f.photos && f.photos.length){ try{ const s=await sb.storage.from("job-photos").createSignedUrl(f.photos[0],3600); if(s.data&&s.data.signedUrl) thumb=`<img class="findthumb" src="${s.data.signedUrl}">`; }catch(_){ } }
     const sev=(f.severity||"recommend");
-    el.insertAdjacentHTML("beforeend",`<div class="findcard ${sev}">${thumb||'<div class="findthumb"></div>'}<div style="flex:1;min-width:0"><h5>${f.title||"Finding"}</h5>${f.location?`<div class="fm">📍 ${f.location}</div>`:""}${f.note?`<div class="fm">${f.note}</div>`:""}<span class="findsev ${sev}">${sev}</span></div></div>`);
+    const aiBlock = f.ai_summary ? `<div class="aibox">✨ ${f.ai_summary}</div>` : `<button class="aibtn" onclick="analyseFinding('${f.id}',this)">✨ Analyse with AI</button>`;
+    el.insertAdjacentHTML("beforeend",`<div class="findcard ${sev}">${thumb||'<div class="findthumb"></div>'}<div style="flex:1;min-width:0"><h5>${f.title||"Finding"}</h5>${f.location?`<div class="fm">📍 ${f.location}</div>`:""}${f.note?`<div class="fm">${f.note}</div>`:""}<span class="findsev ${sev}">${sev}</span>${aiBlock}</div></div>`);
   }
 }
+window.analyseFinding=async(id,btn)=>{
+  btn.disabled=true; btn.textContent="Analysing...";
+  const {data,error}=await sb.functions.invoke("app-analyse-finding",{body:{findingId:id}});
+  if(error||!data||!data.ok){ btn.disabled=false; btn.textContent="✨ Analyse with AI"; toast("AI: "+((data&&data.error)||(error&&error.message)||"failed")); return; }
+  toast("AI analysis done"); loadFindings();
+};
 
 // BOOT
 async function boot(){
