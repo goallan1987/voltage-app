@@ -83,6 +83,18 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
 .field:focus{outline:none;border-color:var(--brand);background:#fff}
 .row2{display:flex;gap:10px}
 .note-ok{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.3)}
+.addfind{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--brand-ink);background:var(--cy-50);border:1px solid var(--cy-200);border-radius:9999px;padding:7px 13px;cursor:pointer}
+.shotbtn{display:block;border:2px dashed var(--cy-300);color:var(--brand-ink);border-radius:12px;padding:16px;text-align:center;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:10px}
+.findprev{width:100%;border-radius:12px;margin-bottom:10px;max-height:220px;object-fit:cover}
+.micbtn{position:absolute;right:8px;bottom:18px;width:34px;height:34px;border-radius:50%;border:none;background:var(--grad-current);color:#fff;cursor:pointer;font-size:15px}
+.micbtn.rec{background:var(--bad)}
+.findcard{display:flex;gap:12px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:var(--e2)}
+.findcard.urgent{border-left-color:var(--bad)}.findcard.info{border-left-color:var(--brand)}
+.findthumb{width:56px;height:56px;border-radius:9px;object-fit:cover;background:var(--sand-100);flex-shrink:0}
+.findcard h5{font-size:14px;margin:0 0 2px;color:var(--ink-900);font-family:var(--fd)}
+.findcard .fm{font-size:12px;color:var(--text-soft)}
+.findsev{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:9999px;background:rgba(245,166,35,.15);color:#9a6a00;display:inline-block;margin-top:4px}
+.findsev.urgent{background:rgba(239,68,68,.12);color:var(--bad-deep)}.findsev.info{background:var(--cy-50);color:var(--brand-ink)}
 
 /* TEAM */
 .member{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--e2);margin-bottom:10px;cursor:pointer}
@@ -184,6 +196,22 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
     </div>
     <div class="pad">
       <div id="jobBody"><div class="spinner"></div></div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px">
+        <span class="kicker" style="margin:0">Findings</span>
+        <button class="addfind" onclick="toggleFindForm()">+ Add finding</button>
+      </div>
+      <div id="findForm" class="card hide" style="margin-top:10px">
+        <label class="shotbtn"><input type="file" id="findPhoto" accept="image/*" capture="environment" style="display:none" onchange="onPhotoPick()"><span id="shotText">📷 Take / choose photo</span></label>
+        <img id="findPreview" class="findprev hide">
+        <input class="field" id="findTitle" placeholder="What did you find? (e.g. No safety switch on lighting)">
+        <input class="field" id="findLoc" placeholder="Location (e.g. switchboard, kitchen)">
+        <select class="field" id="findSev"><option value="recommend">Recommend</option><option value="urgent">Urgent</option><option value="info">Info</option></select>
+        <div style="position:relative"><textarea class="field" id="findNote" rows="2" placeholder="Notes — or tap the mic and talk it through..."></textarea><button class="micbtn" id="findMic" onclick="recFindVoice()">🎤</button></div>
+        <button class="btn" id="saveFindBtn" onclick="saveFinding()">Save finding</button>
+      </div>
+      <div id="findList"></div>
+
       <span class="kicker" style="margin-top:18px">Job notes · writes to Simpro</span>
       <div class="card" id="noteCard">
         <textarea class="field" id="noteWhat" rows="3" placeholder="What did you do? Where, and how long..."></textarea>
@@ -315,6 +343,7 @@ async function openJob(id,customer,site){
       <div style="font-size:15px;font-weight:600;color:var(--ink-900)">${desc||"(no description from Simpro)"}</div>
       ${status?`<div class="muted" style="margin-top:6px;font-size:13px">Status: ${status}</div>`:""}</div>`;
   }catch(e){ $("jobBody").innerHTML=`<div class="card muted">Job detail unavailable (${e.message||"error"}). You can still add notes below.</div>`; }
+  resetFindForm(); loadFindings();
 }
 window.saveNote=async()=>{const what=$("noteWhat").value.trim();if(!what){toast("Add a note before saving");return;}
   $("saveNoteBtn").disabled=true;$("saveNoteBtn").textContent="Saving...";
@@ -322,6 +351,37 @@ window.saveNote=async()=>{const what=$("noteWhat").value.trim();if(!what){toast(
   if(error){$("saveNoteBtn").disabled=false;$("saveNoteBtn").textContent="Save & sync to Simpro";toast("Couldn't save: "+error.message);return;}
   try{await sb.functions.invoke("simpro-job-notes",{body:{jobId:CURRENT_JOB,note:what}});}catch(_){}
   $("noteCard").classList.add("note-ok");$("saveNoteBtn").textContent="✓ Saved & synced";toast("Notes saved to job #"+CURRENT_JOB);};
+
+// FINDINGS
+function resetFindForm(){ $("findForm").classList.add("hide"); $("findTitle").value=""; $("findLoc").value=""; $("findNote").value=""; $("findSev").value="recommend"; $("findPhoto").value=""; $("findPreview").classList.add("hide"); $("findPreview").src=""; $("shotText").textContent="📷 Take / choose photo"; }
+window.toggleFindForm=()=>{ $("findForm").classList.toggle("hide"); };
+window.onPhotoPick=()=>{ const f=$("findPhoto").files[0]; if(f){ $("findPreview").src=URL.createObjectURL(f); $("findPreview").classList.remove("hide"); $("shotText").textContent="📷 Change photo"; } };
+window.recFindVoice=()=>{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){toast("Voice not supported on this browser — type the note");return;} const r=new SR(); r.lang="en-AU"; r.interimResults=false; const m=$("findMic"); m.classList.add("rec"); m.textContent="●"; r.onresult=(e)=>{ $("findNote").value=($("findNote").value+" "+e.results[0][0].transcript).trim(); }; r.onend=()=>{m.classList.remove("rec");m.textContent="🎤";}; r.onerror=()=>{m.classList.remove("rec");m.textContent="🎤";}; r.start(); };
+window.saveFinding=async()=>{
+  const title=$("findTitle").value.trim(); if(!title){toast("Add a short title");return;}
+  $("saveFindBtn").disabled=true; $("saveFindBtn").textContent="Saving...";
+  let path=null; const f=$("findPhoto").files[0];
+  if(f){ path=CURRENT_JOB+"/"+Date.now()+"_"+(f.name||"photo.jpg").replace(/[^a-zA-Z0-9.]/g,"");
+    const up=await sb.storage.from("job-photos").upload(path,f,{upsert:false,contentType:f.type||"image/jpeg"});
+    if(up.error){ $("saveFindBtn").disabled=false;$("saveFindBtn").textContent="Save finding"; toast("Photo upload failed: "+up.error.message); return; } }
+  const {data,error}=await sb.rpc("app_save_finding",{p_job_id:CURRENT_JOB,p_title:title,p_location:$("findLoc").value.trim()||null,p_severity:$("findSev").value,p_note:$("findNote").value.trim()||null,p_photo_path:path});
+  $("saveFindBtn").disabled=false; $("saveFindBtn").textContent="Save finding";
+  if(error||!data||!data.ok){ toast("Couldn't save finding"+(error?": "+error.message:"")); return; }
+  resetFindForm(); toast("Finding saved"); loadFindings();
+};
+async function loadFindings(){
+  const el=$("findList"); el.innerHTML="";
+  const {data,error}=await sb.rpc("app_job_findings",{p_job_id:CURRENT_JOB});
+  if(error||!data||!data.ok){ return; }
+  const fs=data.findings||[];
+  if(!fs.length){ el.innerHTML='<div class="muted" style="font-size:13px;padding:4px 2px">No findings logged yet.</div>'; return; }
+  for(const f of fs){
+    let thumb="";
+    if(f.photos && f.photos.length){ try{ const s=await sb.storage.from("job-photos").createSignedUrl(f.photos[0],3600); if(s.data&&s.data.signedUrl) thumb=`<img class="findthumb" src="${s.data.signedUrl}">`; }catch(_){ } }
+    const sev=(f.severity||"recommend");
+    el.insertAdjacentHTML("beforeend",`<div class="findcard ${sev}">${thumb||'<div class="findthumb"></div>'}<div style="flex:1;min-width:0"><h5>${f.title||"Finding"}</h5>${f.location?`<div class="fm">📍 ${f.location}</div>`:""}${f.note?`<div class="fm">${f.note}</div>`:""}<span class="findsev ${sev}">${sev}</span></div></div>`);
+  }
+}
 
 // BOOT
 async function boot(){
