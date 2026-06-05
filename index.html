@@ -118,6 +118,57 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
 .sevtag.urgent{background:rgba(239,68,68,.12);color:var(--bad-deep)}.sevtag.recommend{background:rgba(245,166,35,.15);color:#9a6a00}.sevtag.info{background:var(--cy-50);color:var(--brand-ink)}
 .rpt-foot{padding:18px 22px 30px;border-top:1px solid var(--line);font-size:11.5px;color:var(--text-faint);text-align:center;line-height:1.6}
 @media print{ .nav,.rpt-top,#toast{display:none!important} .app{padding-bottom:0} body{background:#fff} }
+.cochk{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:14px;font-weight:600;cursor:pointer}
+.cochk input{width:22px;height:22px;accent-color:var(--ok)}
+.ci-row{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:var(--e2)}
+.ci-row .field{margin-bottom:8px}.ci-row .field:last-child{margin:0}
+.gaprow{display:flex;gap:9px;align-items:flex-start;padding:8px 0;font-size:13.5px;border-bottom:1px solid var(--sand-100)}
+.gaprow:last-child{border-bottom:none}
+.gaprow .gi{flex-shrink:0;font-weight:900}
+.gaprow.ok .gi{color:var(--ok-deep)}.gaprow.warn .gi{color:#9a6a00}
+/* PERFORMANCE */
+.perfhero{display:flex;align-items:center;gap:16px}
+.rankname{font-size:20px;font-weight:900;letter-spacing:-.01em}
+.streak{display:inline-block;margin-top:6px;font-size:12px;font-weight:800;background:var(--sand-100);border-radius:9999px;padding:4px 11px}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.pcell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 4px;text-align:center;box-shadow:var(--e1)}
+.plab{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-soft);margin-top:4px;line-height:1.25}
+.statline{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.statline > div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 4px;text-align:center;box-shadow:var(--e1)}
+.statline b{display:block;font-size:17px;font-weight:900;color:var(--brand-ink)}
+.statline span{font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.03em}
+.coachrow{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--sand-100)}
+.coachrow:last-child{border-bottom:none}
+.coachrow .ci{flex-shrink:0;font-size:17px}
+.coachrow b{font-size:13.5px}.coachrow .ct{font-size:12.5px;color:var(--text-soft);margin-top:3px;line-height:1.45}
+/* CHECKLIST */
+.modetog{display:inline-flex;background:var(--sand-100);border-radius:9999px;padding:3px}
+.modetog button{border:none;background:transparent;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);padding:6px 13px;border-radius:9999px;cursor:pointer}
+.modetog button.on{background:#fff;color:var(--brand-ink);box-shadow:var(--e1)}
+.ckprog{height:8px;border-radius:9999px;background:var(--sand-100);overflow:hidden;margin:2px 0 4px}
+.ckprog > i{display:block;height:100%;background:var(--grad-current);border-radius:9999px;transition:width .35s}
+.ckstage{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);margin:14px 0 6px}
+.ckstage:first-of-type{margin-top:6px}
+.ckrow{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--sand-100);cursor:pointer}
+.ckrow:last-child{border-bottom:none}
+.ckbox{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:900;transition:.15s;margin-top:1px}
+.ckrow.done .ckbox{background:var(--ok);border-color:var(--ok)}
+.ckrow.req:not(.done) .ckbox{border-color:var(--brand)}
+.cklbl{flex:1;min-width:0}
+.cklbl h6{margin:0;font-size:14.5px;font-weight:700;line-height:1.35}
+.ckrow.done .cklbl h6{color:var(--text-soft);text-decoration:line-through}
+.ckhelp{font-size:12.5px;color:var(--text-soft);margin-top:3px;line-height:1.45}
+.ckreq{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--brand-ink);background:var(--cy-50);border:1px solid var(--cy-200);border-radius:9999px;padding:1px 7px;margin-left:7px;vertical-align:middle}
+.ckveteran .ckrow{padding:7px 0}.ckveteran .ckhelp{display:none}.ckveteran .ckstage{display:none}
+.gatebox{background:#fff5f4;border:1px solid #f3c9c4;border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.gatebox h6{margin:0 0 8px;font-size:13px;font-weight:800;color:var(--bad-deep,#c0392b)}
+.gatebox .gi{display:flex;gap:8px;font-size:13px;padding:4px 0;color:#7a3b34}
+.mat-row{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:9px;box-shadow:var(--e2)}
+.mat-row .field{margin:0}
+.qtybox{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.qtybox .mat-qty{border:none;text-align:center;width:46px;border-radius:0}
+.qbtn{width:30px;height:36px;border:none;background:var(--cy-50);color:var(--brand-ink);font-size:17px;font-weight:800;cursor:pointer}
+.rmrow{flex-shrink:0;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--text-soft);cursor:pointer;font-size:13px}
 
 /* TEAM */
 .member{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--e2);margin-bottom:10px;cursor:pointer}
@@ -202,6 +253,18 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
         <div><h1 id="meName" style="font-size:22px">You</h1><div class="greet" id="meRole"></div></div>
       </div></div>
     <div class="pad">
+      <span class="kicker">Your performance</span>
+      <div id="perfWrap"><div class="spinner"></div></div>
+
+      <span class="kicker" style="margin-top:20px">Checklist detail</span>
+      <div class="card">
+        <div class="me-row" style="cursor:default">
+          <div><span class="lbl">Guidance level</span><div class="muted" style="font-size:12px;margin-top:2px">Learner shows the full process. Veteran shows summary reminders only.</div></div>
+        </div>
+        <div class="modetog" id="meModeTog" style="margin-top:4px"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div>
+      </div>
+
+      <span class="kicker" style="margin-top:20px">Account</span>
       <div class="card">
         <div class="me-row" onclick="changePassword()"><span class="lbl">Set / change password</span><span class="chev">›</span></div>
         <div class="me-row" onclick="window.open('https://www.responseelectricianperth.com.au','_blank')"><span class="lbl">Field Playbook</span><span class="chev">›</span></div>
@@ -221,6 +284,12 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
       <div id="jobBody"><div class="spinner"></div></div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px">
+        <span class="kicker" style="margin:0">Job checklist</span>
+        <div class="modetog" id="modeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div>
+      </div>
+      <div class="card" id="checkCard" style="margin-top:10px"><div class="spinner"></div></div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px">
         <span class="kicker" style="margin:0">Findings</span>
         <button class="addfind" onclick="toggleFindForm()">+ Add finding</button>
       </div>
@@ -235,6 +304,7 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
       </div>
       <div id="findList"></div>
       <button class="btn" style="margin-top:14px" onclick="buildReport()"><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> Build Electrical Health Report</button>
+      <button class="btn" style="margin-top:10px;background:var(--ink-900);box-shadow:none" onclick="openClose()"><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 11v1a7 7 0 01-14 0v-1M12 19v3"/></svg> Talk through &amp; close out</button>
 
       <span class="kicker" style="margin-top:18px">Job notes · writes to Simpro</span>
       <div class="card" id="noteCard">
@@ -256,6 +326,35 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
     <div id="rptBody" class="rpt"></div>
   </div>
 
+  <!-- CLOSE OUT -->
+  <div id="view-close" class="hide">
+    <div class="hero" style="padding-bottom:18px">
+      <div class="topbar"><button class="back" onclick="openJob(CURRENT_JOB,RPT_CUST,RPT_SITE)">&#8249;</button><span class="sp"></span><span class="pill" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)" id="coPill">Close out</span></div>
+      <div style="padding:12px 0 0"><h1 style="font-size:23px">Close out the job</h1><div class="greet" id="coSub"></div></div>
+    </div>
+    <div class="pad">
+      <div id="coGate"></div>
+      <span class="kicker">Talk through what you did</span>
+      <div class="card">
+        <div style="position:relative"><textarea class="field" id="coText" rows="4" placeholder="Tap the mic and talk: what you did, where, how long, materials used..."></textarea><button class="micbtn" id="coMic" onclick="recCloseVoice()">🎤</button></div>
+        <button class="btn" id="coAnalyseBtn" onclick="analyseClose()"><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> Analyse my close-out</button>
+      </div>
+      <div id="coResult" class="hide">
+        <span class="kicker" style="margin-top:18px">AI check</span>
+        <div class="card" id="coGaps"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px"><span class="kicker" style="margin:0">Line items</span><button class="addfind" onclick="addCloseItem()">+ Add</button></div>
+        <div id="coItems"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px"><span class="kicker" style="margin:0">Materials used</span><button class="addfind" onclick="addCloseMat()">+ Add</button></div>
+        <div id="coMats"></div>
+        <div class="card" style="margin-top:14px">
+          <label class="cochk"><input type="checkbox" id="coTesting"> Mandatory testing complete</label>
+          <label class="cochk"><input type="checkbox" id="coPhotos"> Photos attached</label>
+        </div>
+        <button class="btn" style="margin-top:14px" id="coSaveBtn" onclick="saveCloseout(this)"><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Confirm &amp; send to invoicing</button>
+      </div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="nav hide" id="nav">
     <button data-v="today" onclick="nav('today')"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>Today</button>
@@ -275,7 +374,8 @@ let CURRENT_JOB=null, VIEWING=null, ME=null, TEAM=[], IS_ADMIN=false;
 function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
 function initials(name){return (name||"").split(" ").map(s=>s[0]).slice(0,2).join("").toUpperCase()||"RE";}
 
-function showScreen(id){ ["login","view-today","view-team","view-me","view-job","view-report"].forEach(v=>$(v).classList.add("hide")); $(id).classList.remove("hide"); window.scrollTo(0,0); }
+function showScreen(id){ ["login","view-today","view-team","view-me","view-job","view-report","view-close"].forEach(v=>$(v).classList.add("hide")); $(id).classList.remove("hide"); window.scrollTo(0,0); }
+function esc(s){ return (s||"").toString().replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 function navVisible(on){ $("nav").classList.toggle("hide",!on); }
 window.nav=(v)=>{
   document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
@@ -364,7 +464,39 @@ window.viewMine=()=>{VIEWING=null;loadToday();};
 // ME
 function loadMe(){ showScreen("view-me"); navVisible(true);
   const n=ME?.full_name||"You"; $("meName").textContent=n; $("meAv").textContent=initials(n);
-  $("meRole").textContent=(ME?.role||"Team member").replace(/_/g," "); }
+  $("meRole").textContent=(ME?.role||"Team member").replace(/_/g," "); syncModeToggle(); loadPerformance(); }
+
+// ---------- GAMIFIED PERFORMANCE ----------
+const RANK_META={Rookie:{c:"#888",e:"🔰"},Pro:{c:"#00A4E4",e:"⚡"},"All-Star":{c:"#1E8449",e:"🌟"},Legend:{c:"#B8860B",e:"🏆"}};
+function ring(score,color){ const r=26,circ=2*Math.PI*r,off=circ*(1-score/100); return `<svg viewBox="0 0 64 64" style="width:58px;height:58px"><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--sand-100)" stroke-width="7"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${off}" transform="rotate(-90 32 32)"/><text x="32" y="37" text-anchor="middle" font-size="17" font-weight="800" fill="var(--brand-ink)">${score}</text></svg>`; }
+async function loadPerformance(){
+  const w=$("perfWrap"); w.innerHTML='<div class="spinner"></div>';
+  const {data,error}=await sb.rpc("app_my_scorecard");
+  if(error||!data||!data.ok){ w.innerHTML='<div class="card muted" style="font-size:13px">Scorecard unavailable yet.</div>'; return; }
+  const s=data.scorecard, rm=RANK_META[s.rank]||RANK_META.Rookie;
+  const big=s.overall, oc=rm.c;
+  let pillars=s.pillars.map(p=>{ const col=p.score>=85?"#1E8449":p.score>=65?"#00A4E4":p.score>=40?"#B8860B":"#c0392b"; return `<div class="pcell">${ring(p.score,col)}<div class="plab">${esc(p.label)}</div></div>`; }).join("");
+  let coach=(s.coaching||[]).map(c=>`<div class="coachrow"><div class="ci">💡</div><div><b>${esc(c.label)}</b><div class="ct">${esc(c.tip)}</div></div></div>`).join("");
+  const st=s.stats;
+  w.innerHTML=`
+    <div class="card perfhero">
+      <div class="rankbig" style="border-color:${oc}">${ring(big,oc)}</div>
+      <div style="flex:1">
+        <div class="rankname" style="color:${oc}">${rm.e} ${esc(s.rank)}</div>
+        <div class="muted" style="font-size:12.5px">Overall job score · last 30 days</div>
+        <div class="streak">🔥 ${s.streak}-day streak</div>
+      </div>
+    </div>
+    <div class="pgrid">${pillars}</div>
+    <div class="statline">
+      <div><b>${st.jobs_closed}</b><span>jobs closed</span></div>
+      <div><b>${st.testing_rate}%</b><span>tested</span></div>
+      <div><b>${st.findings}</b><span>findings</span></div>
+      <div><b>$${Number(st.commission||0).toLocaleString()}</b><span>commission</span></div>
+    </div>
+    ${coach?`<div class="kicker" style="margin-top:18px">Coaching · lift your score</div><div class="card">${coach}</div>`:""}
+  `;
+}
 
 // JOB
 async function openJob(id,customer,site){
@@ -378,7 +510,7 @@ async function openJob(id,customer,site){
       <div style="font-size:15px;font-weight:600;color:var(--ink-900)">${desc||"(no description from Simpro)"}</div>
       ${status?`<div class="muted" style="margin-top:6px;font-size:13px">Status: ${status}</div>`:""}</div>`;
   }catch(e){ $("jobBody").innerHTML=`<div class="card muted">Job detail unavailable (${e.message||"error"}). You can still add notes below.</div>`; }
-  resetFindForm(); loadFindings();
+  resetFindForm(); loadFindings(); loadChecklist();
 }
 window.saveNote=async()=>{const what=$("noteWhat").value.trim();if(!what){toast("Add a note before saving");return;}
   $("saveNoteBtn").disabled=true;$("saveNoteBtn").textContent="Saving...";
@@ -408,7 +540,7 @@ async function loadFindings(){
   const el=$("findList"); el.innerHTML="";
   const {data,error}=await sb.rpc("app_job_findings",{p_job_id:CURRENT_JOB});
   if(error||!data||!data.ok){ return; }
-  const fs=data.findings||[];
+  const fs=data.findings||[]; LAST_FINDINGS=fs;
   if(!fs.length){ el.innerHTML='<div class="muted" style="font-size:13px;padding:4px 2px">No findings logged yet.</div>'; return; }
   for(const f of fs){
     let thumb="";
@@ -424,6 +556,48 @@ window.analyseFinding=async(id,btn)=>{
   if(error||!data||!data.ok){ btn.disabled=false; btn.textContent="✨ Analyse with AI"; toast("AI: "+((data&&data.error)||(error&&error.message)||"failed")); return; }
   toast("AI analysis done"); loadFindings();
 };
+
+// ---------- CHECKLIST (adaptive: learner vs veteran) ----------
+let CHECK_TASKS=[], LAST_FINDINGS=[];
+let MODE = (typeof localStorage!=="undefined" && localStorage.getItem("voltage_mode")) || "learner";
+function syncModeToggle(){ document.querySelectorAll("#modeTog button").forEach(b=>b.classList.toggle("on",b.dataset.m===MODE)); const mm=$("meModeTog"); if(mm) mm.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===MODE)); }
+window.setMode=(m)=>{ MODE=m; try{localStorage.setItem("voltage_mode",m);}catch(_){ } syncModeToggle(); renderChecklist(); };
+async function loadChecklist(){
+  $("checkCard").innerHTML='<div class="spinner"></div>'; syncModeToggle();
+  const {data,error}=await sb.rpc("app_job_checklist",{p_job_id:CURRENT_JOB});
+  if(error||!data||!data.ok){ $("checkCard").innerHTML='<div class="muted" style="font-size:13px">Checklist unavailable.</div>'; CHECK_TASKS=[]; return; }
+  CHECK_TASKS=data.tasks||[]; renderChecklist();
+}
+const STAGE_LBL={arrive:"Arrive",assess:"Assess & price",safe:"Make it safe",work:"Do the work",verify:"Test & verify",evidence:"Photo evidence",findings:"Findings",close:"Close out"};
+function renderChecklist(){
+  const c=$("checkCard"); if(!CHECK_TASKS.length){ c.innerHTML='<div class="muted" style="font-size:13px">No checklist steps configured.</div>'; return; }
+  const done=CHECK_TASKS.filter(t=>t.status==="done").length, tot=CHECK_TASKS.length;
+  const reqLeft=CHECK_TASKS.filter(t=>t.required&&t.status!=="done").length;
+  const pct=Math.round(done/tot*100);
+  let head=`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><span style="font-weight:800;font-size:14px">${done} of ${tot} done</span><span class="muted" style="font-size:12px">${reqLeft?reqLeft+" required left":"all required done ✓"}</span></div><div class="ckprog"><i style="width:${pct}%"></i></div>`;
+  let body="", lastStage=null;
+  for(const t of CHECK_TASKS){
+    if(MODE==="learner" && t.stage!==lastStage){ body+=`<div class="ckstage">${STAGE_LBL[t.stage]||t.stage}</div>`; lastStage=t.stage; }
+    const isDone=t.status==="done";
+    const help=(MODE==="learner"&&t.help)?`<div class="ckhelp">${esc(t.help)}</div>`:"";
+    const reqTag=(t.required&&!isDone)?'<span class="ckreq">Required</span>':"";
+    body+=`<div class="ckrow ${isDone?"done":""} ${t.required?"req":""}" onclick="toggleTask('${t.template_id}')"><div class="ckbox">${isDone?"✓":""}</div><div class="cklbl"><h6>${esc(t.label)}${reqTag}</h6>${help}</div></div>`;
+  }
+  c.className="card "+(MODE==="veteran"?"ckveteran":"");
+  c.innerHTML=head+body;
+}
+window.toggleTask=async(tid)=>{
+  const t=CHECK_TASKS.find(x=>x.template_id===tid); if(!t) return;
+  const newDone=t.status!=="done"; t.status=newDone?"done":"todo"; renderChecklist();
+  const {data,error}=await sb.rpc("app_set_task",{p_job_id:CURRENT_JOB,p_template_id:tid,p_done:newDone});
+  if(error||!data||!data.ok){ t.status=newDone?"todo":"done"; renderChecklist(); toast("Couldn't save — try again"); }
+};
+// outstanding required steps + unresolved urgent findings, for the pre-leave gate
+function gateBlockers(){
+  const reqLeft=CHECK_TASKS.filter(t=>t.required&&t.status!=="done").map(t=>t.label);
+  const urgent=(LAST_FINDINGS||[]).filter(f=>{const s=(f.ai_severity||f.severity||"").toLowerCase();return s==="urgent"&&(f.status!=="resolved");}).map(f=>"Unresolved urgent: "+(f.title||"finding"));
+  return reqLeft.concat(urgent);
+}
 // HEALTH REPORT
 let RPT_CUST="", RPT_SITE="";
 window.buildReport=async()=>{
@@ -451,6 +625,47 @@ window.buildReport=async()=>{
     <div class="rpt-foot">Response Fire &amp; Electrical Services Pty Ltd · Licensed EC009022 · 1,900+ 5-Star Reviews<br>Trading as Response Electricians · (08) 9106 9197</div>`;
 };
 window.sendReport=async(btn)=>{ btn.disabled=true; btn.textContent="Sending..."; const {data,error}=await sb.rpc("app_send_health_report",{p_job_id:CURRENT_JOB,p_intro:null}); btn.disabled=false; btn.textContent="Send"; if(error||!data||!data.ok){toast("Couldn't record send");return;} toast("Report recorded — "+data.count+" findings"); };
+
+// ---------- CLOSE-OUT ----------
+window.openClose=()=>{ $("coSub").textContent=(RPT_CUST||"")+(RPT_SITE?" · "+RPT_SITE:""); $("coText").value=""; $("coResult").classList.add("hide"); $("coGaps").innerHTML=""; $("coItems").innerHTML=""; $("coMats").innerHTML=""; $("coTesting").checked=false; $("coPhotos").checked=false; renderGate(); showScreen("view-close"); navVisible(false); };
+function renderGate(){ const g=$("coGate"); if(!g) return; const b=gateBlockers(); if(!b.length){ g.innerHTML=""; return; } g.innerHTML=`<div class="gatebox"><h6>⚠️ Fix before you leave (${b.length})</h6>${b.map(x=>`<div class="gi">• ${esc(x)}</div>`).join("")}<div style="font-size:11.5px;color:#9a6a00;margin-top:8px">Sort these on site so we don't have to come back. They feed into your job score.</div></div>`; }
+window.recCloseVoice=()=>{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){toast("Voice not supported on this browser — type it instead");return;} const r=new SR(); r.lang="en-AU"; r.interimResults=false; r.continuous=true; const m=$("coMic"); m.classList.add("rec"); m.textContent="●"; r.onresult=(e)=>{ let t=""; for(let i=e.resultIndex;i<e.results.length;i++){ if(e.results[i].isFinal) t+=e.results[i][0].transcript+" "; } if(t) $("coText").value=($("coText").value+" "+t).trim(); }; r.onend=()=>{m.classList.remove("rec");m.textContent="🎤";}; r.onerror=()=>{m.classList.remove("rec");m.textContent="🎤";}; m._r=r; r.start(); };
+window.analyseClose=async()=>{
+  const t=$("coText").value.trim(); if(!t){toast("Talk through the job first");return;}
+  const b=$("coAnalyseBtn"); b.disabled=true; b.textContent="Analysing...";
+  const {data,error}=await sb.functions.invoke("app-closeout-analyse",{body:{jobId:CURRENT_JOB,transcript:t}});
+  b.disabled=false; b.innerHTML='<svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> Re-analyse';
+  if(error||!data||!data.ok){ toast("AI: "+((data&&data.error)||(error&&error.message)||"failed")); return; }
+  const a=data.analysis||data;
+  const gaps=a.gaps||[];
+  $("coGaps").innerHTML = gaps.length
+    ? '<div style="font-weight:800;margin-bottom:8px;font-size:13px">Before you leave</div>'+gaps.map(g=>`<div class="gaprow">⚠️ ${esc(g)}</div>`).join("")
+    : '<div style="color:var(--ok,#1E8449);font-weight:700;font-size:14px">✓ Nothing flagged — close-out reads complete.</div>';
+  renderCloseItems(a.line_items||a.items||[]);
+  renderCloseMats(a.materials||[]);
+  $("coTesting").checked=!!a.testing_mentioned;
+  $("coPhotos").checked=!!a.photos_mentioned;
+  $("coResult").classList.remove("hide");
+};
+function renderCloseItems(items){ const el=$("coItems"); el.innerHTML=""; (items.length?items:[{}]).forEach(it=>addCloseItem(it)); }
+function renderCloseMats(mats){ const el=$("coMats"); el.innerHTML=""; (mats.length?mats:[]).forEach(m=>addCloseMat(m)); }
+window.addCloseItem=(it)=>{ it=it||{}; const row=document.createElement("div"); row.className="ci-row"; row.innerHTML=`<input class="field ci-desc" placeholder="What you did" value="${esc(it.description||"")}"><div style="display:flex;gap:8px;margin-top:8px"><input class="field ci-loc" placeholder="Location" value="${esc(it.location||"")}"><input class="field ci-min" type="number" min="0" placeholder="Mins" value="${it.minutes!=null?Number(it.minutes):""}" style="max-width:90px"><button class="rmrow" onclick="this.closest('.ci-row').remove()">✕</button></div>`; $("coItems").appendChild(row); };
+window.addCloseMat=(m)=>{ m=m||{}; const row=document.createElement("div"); row.className="mat-row"; row.innerHTML=`<div style="display:flex;gap:8px;align-items:center"><input class="field mat-desc" placeholder="Material" value="${esc(m.description||"")}" style="flex:1"><div class="qtybox"><button class="qbtn" onclick="matStep(this,-1)">−</button><input class="field mat-qty" type="number" min="0" step="1" value="${m.qty!=null?Number(m.qty):1}"><button class="qbtn" onclick="matStep(this,1)">+</button></div><input class="field mat-unit" placeholder="unit" value="${esc(m.unit||"ea")}" style="max-width:64px"><button class="rmrow" onclick="this.closest('.mat-row').remove()">✕</button></div>`; $("coMats").appendChild(row); };
+window.matStep=(btn,d)=>{ const inp=btn.parentElement.querySelector(".mat-qty"); const v=Math.max(0,(Number(inp.value)||0)+d); inp.value=v; };
+window.saveCloseout=async(btn)=>{
+  const items=[...document.querySelectorAll("#coItems .ci-row")].map(r=>({description:r.querySelector(".ci-desc").value.trim(),location:r.querySelector(".ci-loc").value.trim()||null,minutes:Number(r.querySelector(".ci-min").value)||null})).filter(x=>x.description);
+  const materials=[...document.querySelectorAll("#coMats .mat-row")].map(r=>({description:r.querySelector(".mat-desc").value.trim(),qty:Number(r.querySelector(".mat-qty").value)||0,unit:r.querySelector(".mat-unit").value.trim()||"ea"})).filter(x=>x.description);
+  if(!items.length){toast("Add at least one line item");return;}
+  if(!$("coTesting").checked){toast("Confirm mandatory testing is complete before closing");return;}
+  if(!$("coPhotos").checked){toast("Confirm photos are attached before closing");return;}
+  const blockers=gateBlockers();
+  if(blockers.length){ renderGate(); if(!confirm("There are "+blockers.length+" item(s) still outstanding:\n\n• "+blockers.join("\n• ")+"\n\nClosing now means a possible return visit. Close anyway?")) return; }
+  btn.disabled=true; btn.textContent="Sending...";
+  const {data,error}=await sb.rpc("app_save_closeout",{p_job_id:CURRENT_JOB,p_transcript:$("coText").value.trim()||null,p_testing:$("coTesting").checked,p_photos:$("coPhotos").checked,p_items:items,p_materials:materials});
+  btn.disabled=false; btn.innerHTML='<svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Confirm &amp; send to invoicing';
+  if(error||!data||!data.ok){ toast("Couldn't save close-out"+(error?": "+error.message:"")); return; }
+  toast("Job closed out — sent to invoicing"); openJob(CURRENT_JOB,RPT_CUST,RPT_SITE);
+};
 
 // BOOT
 async function boot(){
