@@ -509,7 +509,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v0.5 (6 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v0.6 (6 Jun)</p>
   </div>
 </section>
 
@@ -578,7 +578,7 @@ window.sb=sb;
 
 var ME=null, MYNAME="", MYFIRST="You", IS_ADMIN=false, TEAM=[], VIEW_STAFF=null, VIEW_NAME=null;
 var JOBSMAP={}, CURRENT_JOB=null, CURJOB_CUST="", CURJOB_SITE="", CHECK=[], SCORE=null;
-var CO_TR="", CO_RES=null, FIND_PHOTO=null, BOOTED=false;
+var CO_TR="", CO_RES=null, FIND_PHOTO=null, BOOTED=false, PB_MATCH=[], MANUAL_MATS=[];
 var EFF=[98,105,92,112,108,121,112], EFFD=["M","T","W","T","F","S","S"];
 var MODE=(function(){try{return localStorage.getItem('voltage_mode')||'learner'}catch(e){return 'learner'}})();
 var ADMIN_EMAILS=["gallan@responseelectricians.com.au","bbailey@responseelectricians.com.au","sredford@responseelectricians.com.au","tdickinson@responseelectricians.com.au","gallan@rfes.com.au","bbailey@rfes.com.au","sredford@rfes.com.au","tdickinson@rfes.com.au"];
@@ -778,22 +778,25 @@ async function analyseClose(){
  var r=await sb.functions.invoke("app-closeout-analyse",{body:{jobId:CURRENT_JOB,transcript:CO_TR}});
  b.disabled=false;b.innerHTML='<svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> Re-analyse';
  if(r.error||!r.data||!r.data.ok){toast("AI: "+((r.data&&r.data.error)||"failed"));return;}
- CO_RES=r.data.analysis||r.data;renderCloseAI();
+ CO_RES=r.data.analysis||r.data;MANUAL_MATS=[];try{var pm=await sb.rpc("app_match_prebuilds",{p_notes:CO_TR,p_job:CURJOB_CUST,p_division:"PR"});PB_MATCH=(pm.data&&pm.data.ok)?(pm.data.prebuilds||[]):[];}catch(e){PB_MATCH=[];}renderCloseAI();
 }
 function renderCloseAI(){
  var a=CO_RES||{},gaps=a.gaps||[],items=a.line_items||a.items||[],mats=a.materials||[];
  var gapH=gaps.length?gaps.map(function(g){return '<div class="gapitem miss"><span class="gi"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></span><div>'+esc(g)+'</div></div>'}).join(""):'<div class="gapitem ok"><span class="gi"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span><div>Nothing flagged — reads complete.</div></div>';
  var itemH=items.map(function(it){return '<div class="lineitem"><div><b>'+esc(it.description||"")+'</b><div class="sub">'+esc(it.location||"")+'</div></div><span class="min">'+(it.minutes!=null?(it.minutes+" min"):"")+'</span></div>'}).join("")||'<div class="muted" style="font-size:12.5px;padding:6px">No line items detected.</div>';
- var matH=mats.map(function(mm,i){return '<div class="matitem"><div class="mt"><b>'+esc(mm.description||"")+'</b><span class="cat">'+esc(mm.unit||"ea")+'</span></div><div class="qty"><button onclick="coMatQ('+i+',-1)">&minus;</button><input id="com'+i+'" value="'+(mm.qty!=null?mm.qty:1)+'" inputmode="numeric"><button onclick="coMatQ('+i+',1)">+</button></div></div>'}).join("")||'<div class="muted" style="font-size:12px;padding:6px">No materials detected.</div>';
+ var matH=(PB_MATCH&&PB_MATCH.length?PB_MATCH:[]).map(function(mm,i){return '<div class="matitem" data-pb="'+mm.prebuild_id+'"><div class="mt"><b>'+esc(mm.name||"")+'</b><span class="cat">'+esc(mm.part_no||"")+(mm.price!=null?(' \u00b7 $'+mm.price):"")+'</span></div><div class="qty"><button onclick="coMatQ('+i+',-1)">&minus;</button><input id="com'+i+'" value="'+(mm.qty!=null?mm.qty:1)+'" inputmode="numeric"><button onclick="coMatQ('+i+',1)">+</button></div></div>'}).join("")||'<div class="muted" style="font-size:12px;padding:6px">No prebuilds auto-matched \u2014 add them manually below.</div>';matH+='<div id="coManualList"></div><div style="display:flex;gap:8px;margin-top:10px"><input id="coManualDesc" placeholder="Add a material" style="flex:1;padding:10px 12px;border:1px solid var(--sand-200,#d9cfc2);border-radius:9px;font-size:13px;box-sizing:border-box"><input id="coManualQty" value="1" inputmode="numeric" style="width:52px;padding:10px;border:1px solid var(--sand-200,#d9cfc2);border-radius:9px;text-align:center"><button class="btn btn-ghost btn-sm" style="width:auto;padding:0 14px" onclick="addManualMat()">Add</button></div>';
  var h='<div class="ai-out"><div class="ah"><span class="spark-dot"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span> AI check vs job notes</div>'+gapH+'</div><div class="kicker" style="margin:14px 2px 8px">Line items for invoicing</div><div class="card">'+itemH+'</div><div class="kicker" style="margin:16px 2px 8px">Materials used &middot; for accurate profit</div><div class="card">'+matH+'</div><label class="tk req" style="margin-top:12px"><input type="checkbox" id="coTest"><span>Mandatory testing complete</span></label><label class="tk req"><input type="checkbox" id="coPhoto"><span>Photos attached</span></label><button class="btn btn-primary" style="margin-top:14px" onclick="finishJob(this)"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Confirm &amp; send to invoicing</button>';
- var el=$("#closeAI");el.innerHTML=h;el.style.display="block";
+ var el=$("#closeAI");el.innerHTML=h;el.style.display="block";renderManual();
  if(a.testing_mentioned){var ct=$("#coTest");if(ct)ct.checked=true;} if(a.photos_mentioned){var cp=$("#coPhoto");if(cp)cp.checked=true;}
 }
 function coMatQ(i,d){var el=$("#com"+i);var v=Math.max(0,(parseInt(el.value)||0)+d);el.value=v}
+function addManualMat(){var d=$("#coManualDesc"),q=$("#coManualQty");var desc=(d.value||"").trim();if(!desc)return;MANUAL_MATS.push({description:desc,qty:Number(q.value)||1});d.value="";q.value="1";renderManual();}
+function renderManual(){var el=$("#coManualList");if(!el)return;el.innerHTML=(MANUAL_MATS||[]).map(function(m,i){return '<div class="matitem"><div class="mt"><b>'+esc(m.description)+'</b><span class="cat">manual entry</span></div><div class="qty"><span style="padding:0 8px;font-weight:700">'+m.qty+'</span><button onclick="rmManual('+i+')">&times;</button></div></div>'}).join("");}
+function rmManual(i){MANUAL_MATS.splice(i,1);renderManual();}
 async function finishJob(btn){
  var a=CO_RES||{};
  var items=(a.line_items||a.items||[]).map(function(it){return {description:it.description,location:it.location||null,minutes:it.minutes!=null?Number(it.minutes):null}}).filter(function(x){return x.description});
- var mats=(a.materials||[]).map(function(mm,i){var q=$("#com"+i);return {description:mm.description,qty:q?(Number(q.value)||0):(mm.qty||0),unit:mm.unit||"ea"}}).filter(function(x){return x.description});
+ var mats=(PB_MATCH||[]).map(function(mm,i){var q=$("#com"+i);return {description:mm.name,qty:q?(Number(q.value)||0):(mm.qty||1),unit:"ea",catalogue_item_id:String(mm.prebuild_id)}}).filter(function(x){return x.qty>0}).concat((MANUAL_MATS||[]).map(function(m){return {description:m.description,qty:m.qty,unit:"ea",catalogue_item_id:null}}));
  if(!$("#coTest").checked){toast("Confirm testing is complete");return;}
  if(!$("#coPhoto").checked){toast("Confirm photos are attached");return;}
  var reqLeft=CHECK.filter(function(t){return t.required&&t.status!=='done'}).map(function(t){return t.label});
