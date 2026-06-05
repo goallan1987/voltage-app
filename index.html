@@ -418,6 +418,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
       <svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
       <p><b>Job notes not done.</b> You can't finish this job until notes are complete. The close-out does it for you in 30 seconds.</p>
     </div>
+    <button class="btn btn-ghost" style="margin-bottom:10px" onclick="openSheet('checkSheet')"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg> Check my work to standard</button>
     <button class="btn btn-primary" onclick="openSheet('closeSheet')"><svg class="ic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4"/></svg> Talk through &amp; close out</button>
   </div>
   <button class="fab" onclick="openSheet('findSheet')"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -509,7 +510,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v0.6 (6 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v0.7 (6 Jun)</p>
   </div>
 </section>
 
@@ -565,6 +566,15 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
   </div>
   <button class="btn btn-primary" id="coAnalyseBtn" style="margin-top:12px" onclick="analyseClose()"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> Analyse my close-out</button>
   <div id="closeAI" style="display:none"></div>
+</div>
+<div class="sheet" id="checkSheet">
+  <div class="grab"></div>
+  <h3>Check my work to standard</h3>
+  <p class="muted" style="font-size:13px;margin-bottom:10px">Photograph the finished work. The AI checks it against AS/NZS 3000 and flags anything to fix before you leave.</p>
+  <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:2px dashed var(--sand-200,#d9cfc2);border-radius:14px;padding:16px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--text-faint,#888)"><input type="file" id="checkPhoto" accept="image/*" capture="environment" style="display:none" onchange="onCheckPhoto()"><span id="checkShotT">&#128247; Photo the finished work</span></label>
+  <img id="checkPrev" style="display:none;width:100%;border-radius:14px;margin:10px 0">
+  <button class="btn btn-primary" style="margin-top:12px" onclick="runWorkCheck(this)"><svg class="ic" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Check against the standard</button>
+  <div id="checkResult" style="display:none;margin-top:14px"></div>
 </div>
 <div id="toast"></div>
 </div><!-- /phone -->
@@ -754,7 +764,7 @@ function viewAs(staffId,name){VIEW_STAFF=staffId;VIEW_NAME=name;go("today");toas
 function timeAgo(iso){var d=new Date(iso),s=(Date.now()-d.getTime())/1000;if(s<3600)return Math.max(1,Math.round(s/60))+"m ago";if(s<86400)return Math.round(s/3600)+"h ago";return Math.round(s/86400)+"d ago"}
 
 // SHEETS
-function openSheet(id){$("#sheetOv").classList.add("open");$("#"+id).classList.add("open");if(id==='closeSheet'){var a=$("#closeAI");if(a){a.style.display="none";a.innerHTML="";}set("#closeVoiceT","Tap and talk");CO_TR="";CO_RES=null;}if(id==='findSheet')resetFind();}
+function openSheet(id){$("#sheetOv").classList.add("open");$("#"+id).classList.add("open");if(id==='closeSheet'){var a=$("#closeAI");if(a){a.style.display="none";a.innerHTML="";}set("#closeVoiceT","Tap and talk");CO_TR="";CO_RES=null;}if(id==='findSheet')resetFind();if(id==='checkSheet')resetCheck();}
 function closeSheet(){$("#sheetOv").classList.remove("open");document.querySelectorAll(".sheet").forEach(function(s){s.classList.remove("open")})}
 
 // FINDINGS
@@ -771,6 +781,11 @@ async function saveFindLive(btn){var title=(($("#findTitle").value)||"").trim();
 async function sendReportLive(btn){if(!CURRENT_JOB){toast("Open a job first");return;}btn.disabled=true;btn.textContent="Sending…";var r=await sb.rpc("app_send_health_report",{p_job_id:CURRENT_JOB,p_intro:null});btn.disabled=false;btn.innerHTML=" Build &amp; send Health Report";if(r.error||!r.data||!r.data.ok){toast("No findings to send yet");return;}toast("⚡ Health Report ready — "+r.data.count+" findings");closeSheet();}
 
 // CLOSE-OUT
+var CHECK_PHOTO=null;
+function resetCheck(){CHECK_PHOTO=null;var p=$("#checkPrev");if(p){p.style.display="none";p.src=""}set("#checkShotT","📷 Photo the finished work");var r=$("#checkResult");if(r){r.style.display="none";r.innerHTML="";}}
+function onCheckPhoto(){var f=$("#checkPhoto").files[0];if(!f)return;CHECK_PHOTO=f;var p=$("#checkPrev");p.src=URL.createObjectURL(f);p.style.display="block";set("#checkShotT","📷 Change photo");}
+async function runWorkCheck(btn){if(!CHECK_PHOTO){toast("Take a photo of the finished work");return;}if(!CURRENT_JOB){toast("Open a job first");return;}btn.disabled=true;btn.textContent="Checking against the standard…";var path=CURRENT_JOB+"/check_"+Date.now()+"_"+(CHECK_PHOTO.name||"work.jpg").replace(/[^a-zA-Z0-9.]/g,"");var up=await sb.storage.from("job-photos").upload(path,CHECK_PHOTO,{upsert:false,contentType:CHECK_PHOTO.type||"image/jpeg"});if(up.error){btn.disabled=false;btn.textContent="Check against the standard";toast("Photo upload failed");return;}var r=await sb.functions.invoke("app-work-check",{body:{jobId:CURRENT_JOB,photoPath:path}});btn.disabled=false;btn.textContent="Re-check";if(r.error||!r.data||!r.data.ok){toast("AI: "+((r.data&&r.data.error)||"failed"));return;}renderCheckResult(r.data.check);}
+function renderCheckResult(c){var el=$("#checkResult");if(!el)return;var pass=c.passed;var head='<div class="ai-out" style="border-color:'+(pass?'rgba(34,197,94,.4)':'rgba(192,57,43,.4)')+'"><div class="ah">'+(pass?'<span style="color:var(--ok-deep,#1E8449)">✓ Passes — safe to leave</span>':'<span style="color:var(--bad-deep,#c0392b)">⚠ Fix before you leave</span>')+(c.score!=null?(' &middot; '+c.score+'/100'):'')+'</div><div class="muted" style="font-size:12.5px;margin-top:4px">'+esc(c.summary||'')+'</div></div>';var iss=(c.issues||[]).map(function(i){var bad=['major','critical'].indexOf((i.severity||'').toLowerCase())>=0;return '<div class="gapitem '+(bad?'miss':'ok')+'"><span class="gi"><svg class="ic" viewBox="0 0 24 24"><path d="'+(bad?'M18 6L6 18M6 6l12 12':'M4 12l5 5L20 6')+'"/></svg></span><div><b>'+esc(i.issue||'')+'</b> <span class="ref">'+esc(i.clause||'')+'</span><div class="muted" style="font-size:12px">'+esc(i.fix||'')+'</div></div></div>'}).join("");el.innerHTML=head+(iss?('<div style="margin-top:10px">'+iss+'</div>'):'');el.style.display="block";}
 function recordClose(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Voice not supported here");return;}var r=new SR();r.lang="en-AU";r.interimResults=false;r.continuous=true;var m=$("#closeMic");m.classList.add("rec");set("#closeVoiceT","Listening…");r.onresult=function(e){var t="";for(var i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)t+=e.results[i][0].transcript+" "}if(t){CO_TR=(CO_TR+" "+t).trim();set("#closeVoiceS",CO_TR)}};r.onend=function(){m.classList.remove("rec");set("#closeVoiceT","Tap and talk")};r.onerror=function(){m.classList.remove("rec");set("#closeVoiceT","Tap and talk")};r.start()}
 async function analyseClose(){
  if(!CO_TR){toast("Talk through the job first");return;}
