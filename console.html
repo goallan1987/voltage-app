@@ -77,6 +77,14 @@ tr:hover td{background:#fbfcfd}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(50px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:9999px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:50}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 @media(max-width:820px){.wrap{grid-template-columns:1fr}.side{display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line)}.side .grp{display:none}.side button{white-space:nowrap;margin-bottom:0}.cards{grid-template-columns:repeat(2,1fr)}.main{padding:18px}}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.gcard{position:relative;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.gcard.ispass{border-color:rgba(34,197,94,.5)}.gcard.isfail{border-color:rgba(192,57,43,.6)}
+.gph{width:100%;height:150px;background:var(--soft) center/cover no-repeat}
+.gbadge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;letter-spacing:.05em;padding:3px 9px;border-radius:9999px;color:#fff}
+.gbadge.pass{background:var(--ok)}.gbadge.fail{background:var(--bad)}
+.gbadge.sev-urgent{background:var(--bad)}.gbadge.sev-recommend{background:var(--warn)}.gbadge.sev-info{background:#7a8088}
+.gmeta{padding:9px 11px}.gmeta b{display:block;font-size:12.5px;line-height:1.3}.gmeta span{font-size:11px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -95,6 +103,7 @@ tr:hover td{background:#fbfcfd}
       <button data-v="perf" class="on" onclick="nav('perf')"><svg class="ic" viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l3-4 3 3 5-7"/></svg> Performance</button>
       <button data-v="adopt" onclick="nav('adopt')"><svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0M16 6a3 3 0 010 6M21 20a6 6 0 00-5-5.9"/></svg> Adoption</button>
       <button data-v="assets" onclick="nav('assets')"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg> Assets &amp; reports</button>
+      <button data-v="gallery" onclick="nav('gallery')"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Image gallery</button>
       <div class="grp">Field</div>
       <button onclick="window.open('/','_blank')"><svg class="ic" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg> Open field app</button>
     </nav>
@@ -137,7 +146,7 @@ function rankPill(r){return '<span class="pill rk">'+esc(r||'Rookie')+'</span>'}
 function timeAgo(iso){if(!iso)return'Never';var s=(Date.now()-new Date(iso).getTime())/1000;if(s<3600)return Math.max(1,Math.round(s/60))+'m ago';if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago'}
 
 function show(id){["app","login","denied"].forEach(function(x){$("#"+x).classList.add("hide")});$("#"+id).classList.remove("hide")}
-function nav(v){document.querySelectorAll('.side button[data-v]').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});if(v==='perf')renderPerf();if(v==='adopt')renderAdopt();if(v==='assets')renderAssets()}
+function nav(v){document.querySelectorAll('.side button[data-v]').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});if(v==='perf')renderPerf();if(v==='adopt')renderAdopt();if(v==='assets')renderAssets();if(v==='gallery')renderGallery()}
 
 async function sendLink(){var e=($("#email").value||"").trim().toLowerCase();if(!e){toast("Enter your email");return;}var r=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:true}});if(r.error){toast(r.error.message);return;}$("#loginfine").textContent="Magic link sent to "+e+" — open it on this device.";toast("Magic link sent");}
 async function signOut(){await sb.auth.signOut();show("login");}
@@ -213,6 +222,16 @@ function assetTab(a){ASSET_TAB=a;document.querySelectorAll('.tabbar button').for
 }
 async function signImg(elId,path){try{var s=await sb.storage.from("job-photos").createSignedUrl(path,3600);if(s.data&&s.data.signedUrl){var el=$("#"+elId);if(el){el.style.backgroundImage='url('+s.data.signedUrl+')';el.textContent='';}}}catch(e){}}
 
+async function renderGallery(){
+ var m=$("#main");m.innerHTML='<div class="h1">Image gallery</div><div class="sub">Every photo from the field, named, with pass/fail \u2014 last 60 days.</div><div class="loading">Loading images…</div>';
+ var r=await sb.rpc("app_admin_gallery",{p_days:60});var imgs=(r.data&&r.data.ok)?(r.data.images||[]):[];
+ var pass=imgs.filter(function(x){return x.status==='pass'}).length,fail=imgs.filter(function(x){return x.status==='fail'}).length;
+ var cards=imgs.map(function(im,i){var st=im.status;var badge=st==='pass'?'<span class="gbadge pass">PASS</span>':st==='fail'?'<span class="gbadge fail">FAIL</span>':'<span class="gbadge sev-'+st+'">'+esc(st)+'</span>';
+  return '<div class="gcard '+(st==='fail'?'isfail':st==='pass'?'ispass':'')+'"><div class="gph" id="g'+i+'"></div>'+badge+'<div class="gmeta"><b>'+esc(im.name)+'</b><span>#'+im.job_id+' \u00b7 '+esc(im.tech||'\u2014')+'</span></div></div>'}).join("");
+ m.innerHTML='<div class="h1">Image gallery</div><div class="sub">Every photo from the field, named, with pass/fail \u2014 last 60 days. No more clicking into each one.</div><div class="cards"><div class="kpi"><div class="l">Images</div><div class="v">'+imgs.length+'</div></div><div class="kpi"><div class="l">Passed</div><div class="v g">'+pass+'</div></div><div class="kpi"><div class="l">Failed</div><div class="v" style="color:var(--bad)">'+fail+'</div></div><div class="kpi"><div class="l">Findings</div><div class="v">'+(imgs.length-pass-fail)+'</div></div></div><div class="gallery">'+(cards||'<div class="loading">No images yet.</div>')+'</div>';
+ imgs.forEach(function(im,i){signG('g'+i,im.path)});
+}
+async function signG(id,path){try{var s=await sb.storage.from("job-photos").createSignedUrl(path,3600);if(s.data&&s.data.signedUrl){var el=$("#"+id);if(el)el.style.backgroundImage='url('+s.data.signedUrl+')';}}catch(e){}}
 // init
 (async function(){try{var s=await sb.auth.getSession();if(s.data.session){boot();}else{show("login");}}catch(e){show("login");}})();
 sb.auth.onAuthStateChange(function(ev,sess){if(ev==="SIGNED_IN"&&sess){boot();}});
