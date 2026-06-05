@@ -98,6 +98,26 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
 .aibox{margin-top:8px;background:var(--cy-50);border:1px solid var(--cy-200);border-radius:9px;padding:8px 10px;font-size:12.5px;color:var(--ink-900);line-height:1.4}
 .aibtn{margin-top:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--grad-current);border:none;border-radius:9999px;padding:7px 13px;cursor:pointer}
 .aibtn:disabled{opacity:.6}
+#view-report{background:#fff}
+.rpt-top{position:sticky;top:0;z-index:30;display:flex;gap:10px;align-items:center;padding:12px 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.rpt-hero{background:var(--ink-900);background-image:var(--mesh);color:#fff;padding:26px 22px}
+.rpt-hero img{height:26px;margin-bottom:16px}
+.rpt-hero h1{color:#fff;font-size:26px;margin-bottom:8px}
+.rpt-hero .meta{color:rgba(255,255,255,.75);font-size:13px;line-height:1.5}
+.rpt-intro{padding:18px 22px;font-size:14px;color:var(--text);line-height:1.55}
+.rpt-find{padding:0 22px}
+.rpt-item{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:var(--e2)}
+.rpt-item img{width:100%;display:block;max-height:240px;object-fit:cover}
+.rpt-item .body{padding:14px}
+.rpt-item h3{font-size:16px;margin-bottom:6px}
+.rpt-item p{font-size:13.5px;color:var(--text);margin:4px 0}
+.rpt-item .rec{background:var(--cy-50);border-left:3px solid var(--brand);padding:8px 10px;border-radius:8px;font-size:13px;margin-top:8px}
+.rpt-item .refs{margin-top:8px}
+.rpt-item .refs span{font-size:10.5px;font-weight:700;color:var(--brand-ink);background:var(--cy-50);border:1px solid var(--cy-200);border-radius:6px;padding:2px 7px;margin-right:6px;display:inline-block}
+.sevtag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:9999px;white-space:nowrap}
+.sevtag.urgent{background:rgba(239,68,68,.12);color:var(--bad-deep)}.sevtag.recommend{background:rgba(245,166,35,.15);color:#9a6a00}.sevtag.info{background:var(--cy-50);color:var(--brand-ink)}
+.rpt-foot{padding:18px 22px 30px;border-top:1px solid var(--line);font-size:11.5px;color:var(--text-faint);text-align:center;line-height:1.6}
+@media print{ .nav,.rpt-top,#toast{display:none!important} .app{padding-bottom:0} body{background:#fff} }
 
 /* TEAM */
 .member{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--e2);margin-bottom:10px;cursor:pointer}
@@ -214,6 +234,7 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
         <button class="btn" id="saveFindBtn" onclick="saveFinding()">Save finding</button>
       </div>
       <div id="findList"></div>
+      <button class="btn" style="margin-top:14px" onclick="buildReport()"><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> Build Electrical Health Report</button>
 
       <span class="kicker" style="margin-top:18px">Job notes · writes to Simpro</span>
       <div class="card" id="noteCard">
@@ -222,6 +243,17 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
         <button class="btn" id="saveNoteBtn" onclick="saveNote()">Save &amp; sync to Simpro</button>
       </div>
     </div>
+  </div>
+
+  <!-- HEALTH REPORT -->
+  <div id="view-report" class="hide">
+    <div class="rpt-top">
+      <button class="back" style="background:var(--cy-50);color:var(--brand-ink);border-color:var(--cy-200);width:auto;padding:0 14px;border-radius:9999px;font-weight:800;font-size:13px" onclick="openJob(CURRENT_JOB,RPT_CUST,RPT_SITE)">‹ Back</button>
+      <span style="flex:1"></span>
+      <button class="addfind" onclick="window.print()">Print / PDF</button>
+      <button class="aibtn" style="margin:0" onclick="sendReport(this)">Send</button>
+    </div>
+    <div id="rptBody" class="rpt"></div>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -243,7 +275,7 @@ let CURRENT_JOB=null, VIEWING=null, ME=null, TEAM=[], IS_ADMIN=false;
 function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
 function initials(name){return (name||"").split(" ").map(s=>s[0]).slice(0,2).join("").toUpperCase()||"RE";}
 
-function showScreen(id){ ["login","view-today","view-team","view-me","view-job"].forEach(v=>$(v).classList.add("hide")); $(id).classList.remove("hide"); window.scrollTo(0,0); }
+function showScreen(id){ ["login","view-today","view-team","view-me","view-job","view-report"].forEach(v=>$(v).classList.add("hide")); $(id).classList.remove("hide"); window.scrollTo(0,0); }
 function navVisible(on){ $("nav").classList.toggle("hide",!on); }
 window.nav=(v)=>{
   document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
@@ -392,6 +424,33 @@ window.analyseFinding=async(id,btn)=>{
   if(error||!data||!data.ok){ btn.disabled=false; btn.textContent="✨ Analyse with AI"; toast("AI: "+((data&&data.error)||(error&&error.message)||"failed")); return; }
   toast("AI analysis done"); loadFindings();
 };
+// HEALTH REPORT
+let RPT_CUST="", RPT_SITE="";
+window.buildReport=async()=>{
+  RPT_CUST=$("jobCustomer").textContent||"Customer"; RPT_SITE=$("jobSite").textContent||"";
+  showScreen("view-report"); navVisible(false);
+  $("rptBody").innerHTML='<div class="spinner"></div>';
+  const LOGO_W=(document.querySelector('img[src^="data:image/webp"]')||{}).src||"";
+  const {data}=await sb.rpc("app_job_findings",{p_job_id:CURRENT_JOB});
+  const fs=(data&&data.findings)||[]; const order={urgent:0,recommend:1,info:2};
+  fs.sort((a,b)=>(order[a.severity]??1)-(order[b.severity]??1));
+  let items="";
+  for(const f of fs){
+    let img="";
+    if(f.photos&&f.photos.length){ try{const s=await sb.storage.from("job-photos").createSignedUrl(f.photos[0],3600); if(s.data&&s.data.signedUrl) img=`<img src="${s.data.signedUrl}">`;}catch(_){ } }
+    const sev=f.severity||"recommend"; const bodyTxt=f.ai_summary||f.note||"";
+    const rec=f.recommended_action?`<div class="rec"><b>Recommended:</b> ${f.recommended_action}</div>`:"";
+    const refs=(f.standard_refs&&f.standard_refs.length)?`<div class="refs">${f.standard_refs.map(r=>`<span>${r}</span>`).join("")}</div>`:"";
+    items+=`<div class="rpt-item">${img}<div class="body"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><h3>${f.title||"Finding"}</h3><span class="sevtag ${sev}">${sev}</span></div>${f.location?`<p>📍 ${f.location}</p>`:""}${bodyTxt?`<p>${bodyTxt}</p>`:""}${rec}${refs}</div></div>`;
+  }
+  if(!fs.length) items='<p style="color:var(--text-soft)">No findings recorded for this job yet.</p>';
+  const today=new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"});
+  $("rptBody").innerHTML=`<div class="rpt-hero"><img src="${LOGO_W}" alt="Response Electricians"><h1>Electrical Health Report</h1><div class="meta">${RPT_CUST} · ${RPT_SITE}<br>${today}</div></div>
+    <div class="rpt-intro">During our visit we carried out a complimentary electrical health check of your property. Below is what we found, with our recommendations. Anything marked <b>urgent</b> affects safety and we'd advise sorting it promptly.</div>
+    <div class="rpt-find">${items}</div>
+    <div class="rpt-foot">Response Fire &amp; Electrical Services Pty Ltd · Licensed EC009022 · 1,900+ 5-Star Reviews<br>Trading as Response Electricians · (08) 9106 9197</div>`;
+};
+window.sendReport=async(btn)=>{ btn.disabled=true; btn.textContent="Sending..."; const {data,error}=await sb.rpc("app_send_health_report",{p_job_id:CURRENT_JOB,p_intro:null}); btn.disabled=false; btn.textContent="Send"; if(error||!data||!data.ok){toast("Couldn't record send");return;} toast("Report recorded — "+data.count+" findings"); };
 
 // BOOT
 async function boot(){
