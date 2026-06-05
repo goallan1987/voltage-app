@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Voltage — Response Electricians</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -270,7 +273,7 @@ h1,h2,h3{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-height
         <div class="me-row" onclick="window.open('https://www.responseelectricianperth.com.au','_blank')"><span class="lbl">Field Playbook</span><span class="chev">›</span></div>
         <div class="me-row" onclick="signOut()"><span class="lbl" style="color:var(--bad-deep)">Sign out</span><span class="chev">›</span></div>
       </div>
-      <p class="muted" style="font-size:12px;text-align:center;margin-top:18px">Voltage · Response Electricians · v0.2</p>
+      <p class="muted" style="font-size:12px;text-align:center;margin-top:18px">Voltage · Response Electricians · v0.3 (6 Jun)</p>
     </div>
   </div>
 
@@ -504,12 +507,18 @@ async function openJob(id,customer,site){
   $("jobPill").textContent="Job #"+id; $("jobCustomer").textContent=customer||"Job"; $("jobSite").textContent=site||"";
   $("jobBody").innerHTML='<div class="spinner"></div>';
   $("noteWhat").value="";$("noteMin").value="";$("notePrice").value="";$("noteCard").classList.remove("note-ok");$("saveNoteBtn").textContent="Save & sync to Simpro";$("saveNoteBtn").disabled=false;
-  try{const {data,error}=await sb.functions.invoke("simpro-job-detail",{body:{jobId:CURRENT_JOB}});if(error)throw error;
-    const j=(data&&(data.job||data))||{}; const desc=j.description||j.name||""; const status=j.stage||j.status||"";
+  try{const {data,error}=await sb.rpc("app_job_detail",{p_job_id:CURRENT_JOB});if(error)throw error;
+    const j=(data&&data.job)||{};
+    if(j.customer){ $("jobCustomer").textContent=j.customer; }
+    if(j.site){ $("jobSite").textContent=j.site; }
+    const desc=j.description||j.name||""; const status=j.stage||"";
+    const notes=j.notes||"";
     $("jobBody").innerHTML=`<div class="card"><span class="kicker" style="margin:0 0 8px">The job</span>
-      <div style="font-size:15px;font-weight:600;color:var(--ink-900)">${desc||"(no description from Simpro)"}</div>
-      ${status?`<div class="muted" style="margin-top:6px;font-size:13px">Status: ${status}</div>`:""}</div>`;
-  }catch(e){ $("jobBody").innerHTML=`<div class="card muted">Job detail unavailable (${e.message||"error"}). You can still add notes below.</div>`; }
+      <div style="font-size:15px;font-weight:600;color:var(--ink-900)">${esc(desc)||"(no description in Simpro)"}</div>
+      ${status?`<div class="muted" style="margin-top:6px;font-size:13px">Status: ${esc(status)}</div>`:""}
+      ${j.order_no?`<div class="muted" style="font-size:13px">Order: ${esc(j.order_no)}</div>`:""}
+      ${notes?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--sand-100);font-size:13.5px;color:var(--text-soft);white-space:pre-wrap">${esc(notes)}</div>`:""}</div>`;
+  }catch(e){ $("jobBody").innerHTML=`<div class="card muted">Job detail unavailable (${e.message||"error"}). You can still work the job below.</div>`; }
   resetFindForm(); loadFindings(); loadChecklist();
 }
 window.saveNote=async()=>{const what=$("noteWhat").value.trim();if(!what){toast("Add a note before saving");return;}
