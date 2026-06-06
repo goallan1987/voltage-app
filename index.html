@@ -510,7 +510,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v0.8 (6 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v0.9 (6 Jun)</p>
   </div>
 </section>
 
@@ -778,7 +778,7 @@ async function saveFindLive(btn){var title=(($("#findTitle").value)||"").trim();
  if(r.error||!r.data||!r.data.ok){toast("Couldn't save finding");return;}
  toast("✓ Finding saved");resetFind();
 }
-async function sendReportLive(btn){if(!CURRENT_JOB){toast("Open a job first");return;}btn.disabled=true;btn.textContent="Sending…";var r=await sb.rpc("app_send_health_report",{p_job_id:CURRENT_JOB,p_intro:null});btn.disabled=false;btn.innerHTML=" Build &amp; send Health Report";if(r.error||!r.data||!r.data.ok){toast("No findings to send yet");return;}toast("⚡ Health Report ready — "+r.data.count+" findings");closeSheet();}
+async function sendReportLive(btn){if(!CURRENT_JOB){toast("Open a job first");return;}var email=prompt("Email the Health Report to the customer:","");if(email===null)return;email=(email||"").trim();if(!/.+@.+\..+/.test(email)){toast("Enter a valid email");return;}btn.disabled=true;btn.textContent="Sending…";var r=await sb.functions.invoke("app-send-health-report",{body:{jobId:CURRENT_JOB,customerEmail:email}});btn.disabled=false;btn.innerHTML=" Build &amp; send Health Report";if(r.error||!r.data||!r.data.ok){toast("Report: "+((r.data&&r.data.error)||"failed"));return;}toast("⚡ Sent from "+r.data.sent_from+" — "+r.data.count+" findings");closeSheet();}
 
 // CLOSE-OUT
 var CHECK_PHOTO=null;
