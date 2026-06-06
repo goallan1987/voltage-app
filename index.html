@@ -443,10 +443,10 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
       <div class="kpi"><div class="kl">Reviews this week</div><div class="kv" id="kRev">7</div><div class="kt up">▲ team-leading</div></div>
     </div>
 
-    <div class="sec-h"><h3>Labour efficiency — last 7 days</h3></div>
+    <div class="sec-h"><h3>Jobs closed — last 7 days</h3></div>
     <div class="card">
       <div class="chart" id="effChart"></div>
-      <div style="text-align:center;font-size:11.5px;color:var(--text-faint);margin-top:24px">Above 100% = you beat the time allowance. More margin, better experience.</div>
+      <div style="text-align:center;font-size:11.5px;color:var(--text-faint);margin-top:24px">Each bar is a day. Same-day close-outs keep this strong.</div>
     </div>
 
     <div class="sec-h"><h3>Post-job forms · live</h3><a href="#">All</a></div>
@@ -476,8 +476,9 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="askai">
       <h4>Ask the Standards AI</h4>
       <p>Plain-English answers grounded in AS/NZS 3000, WAER and our house standards. Snap a photo of an install and it'll flag issues.</p>
-      <button class="btn btn-primary" onclick="toast('🤖 Opening Standards AI')"><svg class="ic" viewBox="0 0 24 24"><path d="M12 8V4m0 0H8m4 0h4M5 12a7 7 0 0114 0v6H5z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg> Ask a question</button>
+      <button class="btn btn-primary" onclick="askStandards()"><svg class="ic" viewBox="0 0 24 24"><path d="M12 8V4m0 0H8m4 0h4M5 12a7 7 0 0114 0v6H5z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg> Ask a question</button>
     </div>
+    <div id="askResult"></div>
     <div class="sec-h"><h3>Most used</h3></div>
     <div class="kbitem"><h4>RCD protection — what needs it</h4><p>Final subcircuits supplying socket-outlets and lighting require RCD protection. Plain-English rule + when an upgrade is mandatory vs recommended.</p><span class="ref">AS/NZS 3000 cl. 2.6 · WAER ref</span></div>
     <div class="kbitem"><h4>Switchboard upgrade — house standard</h4><p>Our step-by-step: isolation, labelling, RCBO selection (Clipsal), main switch, testing sequence and sign-off.</p><span class="ref">House standard · AS/NZS 3000 cl. 2.3</span></div>
@@ -510,7 +511,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v0.9 (6 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.0 (6 Jun)</p>
   </div>
 </section>
 
@@ -730,7 +731,8 @@ async function renderInsights(){
  renderChart();
 }
 function set(sel,v){var e=$(sel);if(e)e.textContent=v;}
-function renderChart(){var c=$("#effChart");if(!c)return;c.innerHTML="";var max=130;EFF.forEach(function(v,i){var b=document.createElement("div");b.className="bar"+(v===Math.max.apply(null,EFF)?" best":"");b.style.height=(v/max*100)+"%";b.innerHTML='<i>'+v+'</i><s>'+EFFD[i]+'</s>';c.appendChild(b)})}
+async function renderChart(){var c=$("#effChart");if(!c)return;var r=await sb.rpc("app_my_metrics");var days=(r.data&&r.data.ok)?(r.data.days||[]):[];if(!days.length){c.innerHTML='<div style="color:var(--text-faint,#888);font-size:12px;padding:20px;text-align:center;width:100%">No activity yet this week.</div>';return;}c.innerHTML="";var max=Math.max(3);days.forEach(function(d){if((d.jobs||0)>max)max=d.jobs});days.forEach(function(d){var b=document.createElement("div");b.className="bar"+((d.jobs||0)===max&&max>0?" best":"");b.style.height=Math.max(4,(d.jobs||0)/max*100)+"%";b.innerHTML='<i>'+(d.jobs||0)+'</i><s>'+(d.label||"")+'</s>';c.appendChild(b)})}
+async function askStandards(){var q=prompt("Ask a standards question (AS/NZS 3000, WA rules, testing, RCDs...)","");if(!q||!q.trim())return;var el=document.getElementById("askResult");if(el)el.innerHTML='<div class="kbitem">Thinking\u2026</div>';var r=await sb.functions.invoke("app-standards-ask",{body:{question:q.trim()}});if(r.error||!r.data||!r.data.ok){if(el)el.innerHTML='<div class="kbitem">Could not answer: '+esc((r.data&&r.data.error)||"error")+'</div>';return;}var a=r.data;var cl=(a.clauses||[]).length?'<span class="ref">'+a.clauses.map(esc).join(" \u00b7 ")+'</span>':"";if(el)el.innerHTML='<div class="kbitem"><h4>'+esc(q)+'</h4><p>'+esc(a.answer)+'</p>'+(a.safety?'<p style="color:#c0392b;font-weight:600;font-size:12.5px">\u26a0 '+esc(a.safety)+'</p>':"")+cl+'</div>';}
 
 // ME
 async function renderMe(){
