@@ -298,6 +298,14 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
 @media(max-width:520px){.phone{width:100%!important;height:100%!important;max-width:none!important;min-height:100vh!important;border-radius:0!important;border:none!important;box-shadow:none!important}html,body{height:100%;margin:0}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Voltage">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
 </head>
 <body>
 <div class="phone">
@@ -511,7 +519,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.0 (6 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.1 (9 Jun)</p>
   </div>
 </section>
 
@@ -832,5 +840,6 @@ async function finishJob(btn){
 sb.auth.onAuthStateChange(function(ev,sess){if(ev==="SIGNED_IN"&&sess&&!BOOTED){boot().then(function(){go("today")});}});
 
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}</script>
 </body>
 </html>
