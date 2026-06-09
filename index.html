@@ -296,6 +296,8 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
 .modetog button{border:none;background:transparent;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint,#888);padding:7px 15px;border-radius:9999px;cursor:pointer}
 .modetog button.on{background:#fff;color:var(--brand-ink,#00A4E4);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 @media(max-width:520px){.phone{width:100%!important;height:100%!important;max-width:none!important;min-height:100vh!important;border-radius:0!important;border:none!important;box-shadow:none!important}html,body{height:100%;margin:0}}
+.syncpill{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60;font-size:11px;font-weight:800;letter-spacing:.04em;padding:5px 13px;border-radius:9999px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.syncpill.off{background:#9a6a00}.syncpill.busy{background:var(--brand-ink,#00A4E4)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="manifest" href="/manifest.json">
@@ -519,7 +521,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.1 (9 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.2 (9 Jun)</p>
   </div>
 </section>
 
@@ -585,6 +587,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
   <button class="btn btn-primary" style="margin-top:12px" onclick="runWorkCheck(this)"><svg class="ic" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Check against the standard</button>
   <div id="checkResult" style="display:none;margin-top:14px"></div>
 </div>
+<div id="syncPill" class="syncpill" style="display:none"></div>
 <div id="toast"></div>
 </div><!-- /phone -->
 
@@ -606,6 +609,18 @@ function $(s){return document.querySelector(s)}
 function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
 function initials(n){n=(n||'').trim();if(!n)return'RE';var p=n.split(/\s+/);return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase()}
 function toast(m){var t=$("#toast");if(!t)return;t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show")},2400)}
+
+var OUTBOX_KEY="voltage_outbox";
+function obRead(){try{return JSON.parse(localStorage.getItem(OUTBOX_KEY)||"[]")}catch(e){return[]}}
+function obWrite(a){try{localStorage.setItem(OUTBOX_KEY,JSON.stringify(a))}catch(e){}}
+function obUuid(){return (window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now()+"-"+Math.random().toString(16).slice(2)+Math.random().toString(16).slice(2))}
+function obBadge(){var el=$("#syncPill");if(!el)return;var n=obRead().length;if(!navigator.onLine){el.style.display="";el.textContent=n?("Offline · "+n+" to sync"):"Working offline";el.className="syncpill off";}else if(n){el.style.display="";el.textContent="Syncing "+n+"…";el.className="syncpill busy";}else{el.style.display="none";el.className="syncpill";}}
+async function qRpc(name,args,kind){var op=obUuid();var a=Object.assign({},args,{p_op_id:op});if(navigator.onLine){try{var r=await sb.rpc(name,a);if(r.error)throw r.error;if(r.data&&r.data.ok)return{ok:true,data:r.data};return{ok:false,data:r.data};}catch(e){}}var q=obRead();q.push({op:op,name:name,args:a,kind:kind,ts:Date.now()});obWrite(q);obBadge();return{ok:true,queued:true};}
+var OB_FLUSHING=false;
+async function obFlush(){if(OB_FLUSHING||!navigator.onLine){obBadge();return;}var q=obRead();if(!q.length){obBadge();return;}OB_FLUSHING=true;obBadge();var keep=[];for(var i=0;i<q.length;i++){var it=q[i];try{var r=await sb.rpc(it.name,it.args);if(r.error)keep.push(it);}catch(e){keep.push(it);}}obWrite(keep);OB_FLUSHING=false;obBadge();if(keep.length<q.length)toast("Synced "+(q.length-keep.length)+" saved item(s)");}
+window.addEventListener("online",obFlush);window.addEventListener("offline",obBadge);
+setInterval(obFlush,30000);setTimeout(function(){obBadge();obFlush();},1500);
+
 function ring(el,pct,big,small){if(!el)return;var r=26,c=2*Math.PI*r,off=c-(c*(pct||0)/100);el.innerHTML='<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="6"/><circle cx="32" cy="32" r="26" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 32 32)"/><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00A4E4"/><stop offset="1" stop-color="#6fd0f3"/></linearGradient></defs></svg><div class="lbl"><b>'+big+'</b><s>'+small+'</s></div>'}
 
 function go(v){
@@ -721,8 +736,8 @@ function renderSteps(){
 async function toggleTaskLive(tid,el){
  var t=CHECK.find(function(x){return x.template_id===tid});if(!t)return;
  var nd=el.checked;t.status=nd?'done':'todo';renderSteps();
- var r=await sb.rpc("app_set_task",{p_job_id:CURRENT_JOB,p_template_id:tid,p_done:nd});
- if(r.error||!r.data||!r.data.ok){t.status=nd?'todo':'done';renderSteps();toast("Couldn't save — retry");}
+ var r=await qRpc("app_set_task",{p_job_id:CURRENT_JOB,p_template_id:tid,p_done:nd},"task");
+ if(!r.ok){t.status=nd?'todo':'done';renderSteps();toast("Couldn't save — retry");}
 }
 
 // INSIGHTS
@@ -782,10 +797,10 @@ function resetFind(){FIND_PHOTO=null;var t=$("#findTitle");if(t)t.value="";var s
 function onFindPhoto(){var f=$("#findPhoto").files[0];if(!f)return;FIND_PHOTO=f;var p=$("#findPrev");p.src=URL.createObjectURL(f);p.style.display="block";set("#findShotT","📷 Change photo")}
 function recordFind(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Voice not supported — type it");return;}var r=new SR();r.lang="en-AU";r.interimResults=false;var m=$("#findMic");m.classList.add("rec");set("#findVoiceT","Listening…");r.onresult=function(e){var tx=e.results[0][0].transcript;var ti=$("#findTitle");if(!ti.value)ti.value=tx;else ti.value+=" "+tx;set("#findVoiceS",tx)};r.onend=function(){m.classList.remove("rec");set("#findVoiceT","Tap to talk it through")};r.onerror=function(){m.classList.remove("rec");set("#findVoiceT","Tap to talk it through")};r.start()}
 async function saveFindLive(btn){var title=(($("#findTitle").value)||"").trim();if(!title){toast("Add what you found");return;}if(!CURRENT_JOB){toast("Open a job first");return;}btn.disabled=true;btn.textContent="Saving…";var path=null;
- if(FIND_PHOTO){path=CURRENT_JOB+"/"+Date.now()+"_"+(FIND_PHOTO.name||"photo.jpg").replace(/[^a-zA-Z0-9.]/g,"");var up=await sb.storage.from("job-photos").upload(path,FIND_PHOTO,{upsert:false,contentType:FIND_PHOTO.type||"image/jpeg"});if(up.error){btn.disabled=false;btn.textContent="Save finding";toast("Photo upload failed");return;}}
- var r=await sb.rpc("app_save_finding",{p_job_id:CURRENT_JOB,p_title:title,p_location:null,p_severity:$("#findSev").value,p_note:null,p_photo_path:path});
+ if(FIND_PHOTO&&navigator.onLine){path=CURRENT_JOB+"/"+Date.now()+"_"+(FIND_PHOTO.name||"photo.jpg").replace(/[^a-zA-Z0-9.]/g,"");var up=await sb.storage.from("job-photos").upload(path,FIND_PHOTO,{upsert:false,contentType:FIND_PHOTO.type||"image/jpeg"});if(up.error){btn.disabled=false;btn.textContent="Save finding";toast("Photo upload failed");return;}}
+ var r=await qRpc("app_save_finding",{p_job_id:CURRENT_JOB,p_title:title,p_location:null,p_severity:$("#findSev").value,p_note:null,p_photo_path:path},"finding");
  btn.disabled=false;btn.textContent="Save finding";
- if(r.error||!r.data||!r.data.ok){toast("Couldn't save finding");return;}
+ if(!r.ok){toast("Couldn't save finding");return;}
  toast("✓ Finding saved");resetFind();
 }
 async function sendReportLive(btn){if(!CURRENT_JOB){toast("Open a job first");return;}var email=prompt("Email the Health Report to the customer:","");if(email===null)return;email=(email||"").trim();if(!/.+@.+\..+/.test(email)){toast("Enter a valid email");return;}btn.disabled=true;btn.textContent="Sending…";var r=await sb.functions.invoke("app-send-health-report",{body:{jobId:CURRENT_JOB,customerEmail:email}});btn.disabled=false;btn.innerHTML=" Build &amp; send Health Report";if(r.error||!r.data||!r.data.ok){toast("Report: "+((r.data&&r.data.error)||"failed"));return;}toast("⚡ Sent from "+r.data.sent_from+" — "+r.data.count+" findings");closeSheet();}
@@ -827,9 +842,9 @@ async function finishJob(btn){
  var reqLeft=CHECK.filter(function(t){return t.required&&t.status!=='done'}).map(function(t){return t.label});
  if(reqLeft.length){if(!confirm(reqLeft.length+" required step(s) still open:\n\n• "+reqLeft.join("\n• ")+"\n\nClose anyway?"))return;}
  btn.disabled=true;btn.textContent="Sending…";
- var r=await sb.rpc("app_save_closeout",{p_job_id:CURRENT_JOB,p_transcript:CO_TR||null,p_testing:true,p_photos:true,p_items:items,p_materials:mats});
+ var r=await qRpc("app_save_closeout",{p_job_id:CURRENT_JOB,p_transcript:CO_TR||null,p_testing:true,p_photos:true,p_items:items,p_materials:mats},"closeout");
  btn.disabled=false;
- if(r.error||!r.data||!r.data.ok){toast("Couldn't save close-out");return;}
+ if(!r.ok){toast("Couldn't save close-out");return;}if(r.queued){closeSheet();toast("✅ Saved offline — syncs when back online");CO_TR="";CO_RES=null;return;}
  try{sb.functions.invoke("app-simpro-push",{body:{jobId:CURRENT_JOB,dryRun:false,pushMaterials:false,pushPhotos:true}});}catch(e){}closeSheet();toast("✅ Closed out · synced to Simpro");CO_TR="";CO_RES=null;if(CURRENT_JOB)loadChecklist();
 }
 
