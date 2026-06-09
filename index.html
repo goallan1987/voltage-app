@@ -298,6 +298,18 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
 @media(max-width:520px){.phone{width:100%!important;height:100%!important;max-width:none!important;min-height:100vh!important;border-radius:0!important;border:none!important;box-shadow:none!important}html,body{height:100%;margin:0}}
 .syncpill{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60;font-size:11px;font-weight:800;letter-spacing:.04em;padding:5px 13px;border-radius:9999px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .syncpill.off{background:#9a6a00}.syncpill.busy{background:var(--brand-ink,#00A4E4)}
+.pbitem{border-bottom:1px solid var(--sand-100,#efe9e1);padding:11px 0}.pbitem:last-child{border-bottom:none}
+.pbhead{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600}
+.alw{font-size:11px;color:var(--text-faint,#888);margin-left:auto;white-space:nowrap}
+.qmul{font-size:11px;font-weight:800;color:var(--brand-ink,#00A4E4)}
+.pbf{width:100%;margin-top:7px;padding:9px 11px;border:1px solid var(--sand-200,#d9cfc2);border-radius:9px;font-size:13px;box-sizing:border-box}
+.pbrow{display:flex;align-items:center;gap:8px;margin-top:7px}
+.pbmin{width:92px;padding:9px;border:1px solid var(--sand-200,#d9cfc2);border-radius:9px;font-size:13px;text-align:center}
+.pbq{width:38px;border:none;text-align:center;font-size:13px;background:transparent}
+.qtybox{display:flex;align-items:center;border:1px solid var(--sand-200,#d9cfc2);border-radius:9px;overflow:hidden}
+.qbtn{width:28px;height:34px;border:none;background:var(--sand-100,#efe9e1);font-size:16px;font-weight:800;cursor:pointer;color:var(--brand-ink,#00A4E4)}
+.effb{font-size:12px;font-weight:800;padding:4px 9px;border-radius:9999px;background:var(--sand-100,#efe9e1);color:var(--text-faint,#888);white-space:nowrap}
+.effb.good{background:rgba(34,197,94,.15);color:var(--ok-deep,#1E8449)}.effb.ok{background:rgba(245,166,35,.18);color:#9a6a00}.effb.bad{background:rgba(192,57,43,.13);color:#c0392b}.effb.tot{font-size:13px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="manifest" href="/manifest.json">
@@ -521,7 +533,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.2 (9 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.3 (9 Jun)</p>
   </div>
 </section>
 
@@ -821,31 +833,53 @@ async function analyseClose(){
  CO_RES=r.data.analysis||r.data;MANUAL_MATS=[];try{var pm=await sb.rpc("app_match_prebuilds",{p_notes:CO_TR,p_job:CURJOB_CUST,p_division:"PR"});PB_MATCH=(pm.data&&pm.data.ok)?(pm.data.prebuilds||[]):[];}catch(e){PB_MATCH=[];}renderCloseAI();
 }
 function renderCloseAI(){
- var a=CO_RES||{},gaps=a.gaps||[],items=a.line_items||a.items||[],mats=a.materials||[];
+ var a=CO_RES||{},gaps=a.gaps||[];
+ var ai=(a.line_items||a.items||[]);
  var gapH=gaps.length?gaps.map(function(g){return '<div class="gapitem miss"><span class="gi"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></span><div>'+esc(g)+'</div></div>'}).join(""):'<div class="gapitem ok"><span class="gi"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span><div>Nothing flagged — reads complete.</div></div>';
- var itemH=items.map(function(it){return '<div class="lineitem"><div><b>'+esc(it.description||"")+'</b><div class="sub">'+esc(it.location||"")+'</div></div><span class="min">'+(it.minutes!=null?(it.minutes+" min"):"")+'</span></div>'}).join("")||'<div class="muted" style="font-size:12.5px;padding:6px">No line items detected.</div>';
- var matH=(PB_MATCH&&PB_MATCH.length?PB_MATCH:[]).map(function(mm,i){return '<div class="matitem" data-pb="'+mm.prebuild_id+'"><div class="mt"><b>'+esc(mm.name||"")+'</b><span class="cat">'+esc(mm.part_no||"")+(mm.price!=null?(' \u00b7 $'+mm.price):"")+'</span></div><div class="qty"><button onclick="coMatQ('+i+',-1)">&minus;</button><input id="com'+i+'" value="'+(mm.qty!=null?mm.qty:1)+'" inputmode="numeric"><button onclick="coMatQ('+i+',1)">+</button></div></div>'}).join("")||'<div class="muted" style="font-size:12px;padding:6px">No prebuilds auto-matched \u2014 add them manually below.</div>';matH+='<div id="coManualList"></div><div style="display:flex;gap:8px;margin-top:10px"><input id="coManualDesc" placeholder="Add a material" style="flex:1;padding:10px 12px;border:1px solid var(--sand-200,#d9cfc2);border-radius:9px;font-size:13px;box-sizing:border-box"><input id="coManualQty" value="1" inputmode="numeric" style="width:52px;padding:10px;border:1px solid var(--sand-200,#d9cfc2);border-radius:9px;text-align:center"><button class="btn btn-ghost btn-sm" style="width:auto;padding:0 14px" onclick="addManualMat()">Add</button></div>';
- var h='<div class="ai-out"><div class="ah"><span class="spark-dot"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span> AI check vs job notes</div>'+gapH+'</div><div class="kicker" style="margin:14px 2px 8px">Line items for invoicing</div><div class="card">'+itemH+'</div><div class="kicker" style="margin:16px 2px 8px">Materials used &middot; for accurate profit</div><div class="card">'+matH+'</div><label class="tk req" style="margin-top:12px"><input type="checkbox" id="coTest"><span>Mandatory testing complete</span></label><label class="tk req"><input type="checkbox" id="coPhoto"><span>Photos attached</span></label><button class="btn btn-primary" style="margin-top:14px" onclick="finishJob(this)"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Confirm &amp; send to invoicing</button>';
- var el=$("#closeAI");el.innerHTML=h;el.style.display="block";renderManual();
+ var pb=(PB_MATCH&&PB_MATCH.length?PB_MATCH:[]);
+ var rows=pb.map(function(mm,i){var alw=Number(mm.allowance_min||0);var pre="",loc="";
+   for(var k=0;k<ai.length;k++){var d=(ai[k].description||"").toLowerCase().split(" ")[0];if(d&&(mm.name||"").toLowerCase().indexOf(d)>=0){if(ai[k].minutes!=null)pre=ai[k].minutes;if(ai[k].location)loc=ai[k].location;break;}}
+   return '<div class="pbitem"><div class="pbhead"><b>'+esc(mm.name||"")+'</b>'+(mm.qty>1?'<span class="qmul">×'+mm.qty+'</span>':"")+'<span class="alw">'+(alw?('allows '+alw+'m'+(mm.qty>1?' ea':"")):'no standard')+'</span></div>'+
+     '<input class="pbf" id="piloc'+i+'" value="'+esc(loc)+'" placeholder="Where did you do it?">'+
+     '<div class="pbrow"><div class="qtybox"><button class="qbtn" onclick="piQty('+i+',-1)">−</button><input id="piqty'+i+'" class="pbq" value="'+(mm.qty||1)+'" inputmode="numeric" oninput="coEff()"><button class="qbtn" onclick="piQty('+i+',1)">+</button></div>'+
+     '<input id="pimin'+i+'" class="pbmin" value="'+(pre!==""?pre:"")+'" inputmode="numeric" placeholder="Actual min" oninput="coEff()"><span class="effb" id="pieff'+i+'">—</span></div>'+
+     '<input class="pbf rsn" id="pirsn'+i+'" placeholder="Over the allowance — why? (non-standard, access, fault)" style="display:none">'+
+     '</div>';
+ }).join("")||'<div class="muted" style="font-size:12px;padding:8px">No prebuilds auto-matched — add the work below.</div>';
+ var h='<div class="ai-out"><div class="ah"><span class="spark-dot"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span> AI check vs job notes</div>'+gapH+'</div>'+
+  '<div class="between" style="margin:16px 2px 8px"><span class="kicker" style="margin:0">Work done · time per item</span><span class="effb tot" id="coTotalEff">—</span></div>'+
+  '<div class="card" style="padding:10px 12px">'+rows+'<div id="coManualList"></div><div style="display:flex;gap:8px;margin-top:12px"><input id="coManualDesc" placeholder="Add another item of work" style="flex:1;padding:10px 12px;border:1px solid var(--sand-200,#d9cfc2);border-radius:9px;font-size:13px;box-sizing:border-box"><button class="btn btn-ghost btn-sm" style="width:auto;padding:0 14px" onclick="addManualMat()">Add</button></div></div>'+
+  '<label class="tk req" style="margin-top:14px"><input type="checkbox" id="coTest"><span>Mandatory testing complete</span></label><label class="tk req"><input type="checkbox" id="coPhoto"><span>Photos attached</span></label>'+
+  '<button class="btn btn-primary" style="margin-top:14px" onclick="finishJob(this)"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Confirm work &amp; efficiency</button>';
+ var el=$("#closeAI");el.innerHTML=h;el.style.display="block";renderManual();coEff();
  if(a.testing_mentioned){var ct=$("#coTest");if(ct)ct.checked=true;} if(a.photos_mentioned){var cp=$("#coPhoto");if(cp)cp.checked=true;}
 }
 function coMatQ(i,d){var el=$("#com"+i);var v=Math.max(0,(parseInt(el.value)||0)+d);el.value=v}
-function addManualMat(){var d=$("#coManualDesc"),q=$("#coManualQty");var desc=(d.value||"").trim();if(!desc)return;MANUAL_MATS.push({description:desc,qty:Number(q.value)||1});d.value="";q.value="1";renderManual();}
-function renderManual(){var el=$("#coManualList");if(!el)return;el.innerHTML=(MANUAL_MATS||[]).map(function(m,i){return '<div class="matitem"><div class="mt"><b>'+esc(m.description)+'</b><span class="cat">manual entry</span></div><div class="qty"><span style="padding:0 8px;font-weight:700">'+m.qty+'</span><button onclick="rmManual('+i+')">&times;</button></div></div>'}).join("");}
+function addManualMat(){var d=$("#coManualDesc");var desc=(d.value||"").trim();if(!desc)return;MANUAL_MATS.push({description:desc,location:"",minutes:""});d.value="";renderManual();}
+function renderManual(){var el=$("#coManualList");if(!el)return;el.innerHTML=(MANUAL_MATS||[]).map(function(m,i){return '<div class="pbitem"><div class="pbhead"><b>'+esc(m.description)+'</b><span class="alw">manual · no standard</span><button onclick="rmManual('+i+')" style="background:none;border:none;color:var(--text-faint,#888);cursor:pointer;font-size:16px;margin-left:8px">×</button></div><input class="pbf" id="mloc'+i+'" value="'+esc(m.location||"")+'" placeholder="Where?"><div class="pbrow"><input id="mmin'+i+'" class="pbmin" value="'+(m.minutes||"")+'" inputmode="numeric" placeholder="Actual min"></div></div>'}).join("");}
 function rmManual(i){MANUAL_MATS.splice(i,1);renderManual();}
+function piQty(i,d){var el=$("#piqty"+i);if(!el)return;el.value=Math.max(1,(parseInt(el.value)||1)+d);coEff();}
+function coEff(){var pb=(PB_MATCH||[]);var ta=0,tx=0;for(var i=0;i<pb.length;i++){var alw=Number(pb[i].allowance_min||0);var qel=$("#piqty"+i),mel=$("#pimin"+i),eel=$("#pieff"+i),rel=$("#pirsn"+i);if(!mel||!eel)continue;var qty=Math.max(1,parseInt(qel&&qel.value)||1);var act=Number(mel.value)||0;var allow=alw*qty;if(allow>0&&act>0){var e=Math.round(allow/act*100);eel.textContent=e+"%";eel.className="effb "+(e>=100?"good":e>=70?"ok":"bad");ta+=allow;tx+=act;if(rel)rel.style.display=(act>allow)?"":"none";}else{eel.textContent="—";eel.className="effb";if(rel)rel.style.display="none";}}var tel=$("#coTotalEff");if(tel){if(ta>0&&tx>0){var te=Math.round(ta/tx*100);tel.textContent="Total "+te+"%";tel.className="effb tot "+(te>=100?"good":te>=70?"ok":"bad");}else{tel.textContent="—";tel.className="effb tot";}}}
 async function finishJob(btn){
- var a=CO_RES||{};
- var items=(a.line_items||a.items||[]).map(function(it){return {description:it.description,location:it.location||null,minutes:it.minutes!=null?Number(it.minutes):null}}).filter(function(x){return x.description});
- var mats=(PB_MATCH||[]).map(function(mm,i){var q=$("#com"+i);return {description:mm.name,qty:q?(Number(q.value)||0):(mm.qty||1),unit:"ea",catalogue_item_id:String(mm.prebuild_id)}}).filter(function(x){return x.qty>0}).concat((MANUAL_MATS||[]).map(function(m){return {description:m.description,qty:m.qty,unit:"ea",catalogue_item_id:null}}));
+ var pb=(PB_MATCH||[]);var items=[];var missing=[];
+ for(var i=0;i<pb.length;i++){var loc=($("#piloc"+i)||{}).value||"";var min=($("#pimin"+i)||{}).value||"";var qty=Math.max(1,parseInt(($("#piqty"+i)||{}).value)||1);
+   if(!loc.trim())missing.push((pb[i].name||"item")+": where?");
+   if(!(Number(min)>0))missing.push((pb[i].name||"item")+": how long?");
+   var alw=Number(pb[i].allowance_min||0)*qty;var act=Number(min)||0;var eff=(alw>0&&act>0)?Math.round(alw/act*100):null;
+   items.push({description:pb[i].name,location:loc.trim()||null,minutes:act||null,qty:qty,prebuild_id:String(pb[i].prebuild_id),allowance_min:alw||null,efficiency_pct:eff,overrun_reason:(act>alw&&alw>0)?((($("#pirsn"+i)||{}).value||"").trim()||null):null});
+ }
+ (MANUAL_MATS||[]).forEach(function(m,i){var loc=($("#mloc"+i)||{}).value||"";var min=($("#mmin"+i)||{}).value||"";if(!loc.trim())missing.push((m.description||"item")+": where?");if(!(Number(min)>0))missing.push((m.description||"item")+": how long?");items.push({description:m.description,location:loc.trim()||null,minutes:Number(min)||null,qty:1,prebuild_id:null,allowance_min:null,efficiency_pct:null,overrun_reason:null});});
+ if(!items.length){toast("Add at least one item of work");return;}
+ if(missing.length){toast("Need detail — "+missing.slice(0,2).join("; ")+(missing.length>2?(" +"+(missing.length-2)+" more"):""));return;}
  if(!$("#coTest").checked){toast("Confirm testing is complete");return;}
  if(!$("#coPhoto").checked){toast("Confirm photos are attached");return;}
  var reqLeft=CHECK.filter(function(t){return t.required&&t.status!=='done'}).map(function(t){return t.label});
  if(reqLeft.length){if(!confirm(reqLeft.length+" required step(s) still open:\n\n• "+reqLeft.join("\n• ")+"\n\nClose anyway?"))return;}
  btn.disabled=true;btn.textContent="Sending…";
- var r=await qRpc("app_save_closeout",{p_job_id:CURRENT_JOB,p_transcript:CO_TR||null,p_testing:true,p_photos:true,p_items:items,p_materials:mats},"closeout");
+ var r=await qRpc("app_save_closeout",{p_job_id:CURRENT_JOB,p_transcript:CO_TR||null,p_testing:true,p_photos:true,p_items:items,p_materials:[]},"closeout");
  btn.disabled=false;
  if(!r.ok){toast("Couldn't save close-out");return;}if(r.queued){closeSheet();toast("✅ Saved offline — syncs when back online");CO_TR="";CO_RES=null;return;}
- try{sb.functions.invoke("app-simpro-push",{body:{jobId:CURRENT_JOB,dryRun:false,pushMaterials:false,pushPhotos:true}});}catch(e){}closeSheet();toast("✅ Closed out · synced to Simpro");CO_TR="";CO_RES=null;if(CURRENT_JOB)loadChecklist();
+ try{sb.functions.invoke("app-simpro-push",{body:{jobId:CURRENT_JOB,dryRun:false,pushMaterials:false,pushPhotos:true}});}catch(e){}closeSheet();toast("✅ Closed out · synced");CO_TR="";CO_RES=null;if(CURRENT_JOB)loadChecklist();
 }
 
 // init
