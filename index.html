@@ -533,7 +533,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.5 (9 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.6 (9 Jun)</p>
   </div>
 </section>
 
@@ -860,6 +860,7 @@ function renderManual(){var el=$("#coManualList");if(!el)return;el.innerHTML=(MA
 function rmManual(i){MANUAL_MATS.splice(i,1);renderManual();}
 function piQty(i,d){var el=$("#piqty"+i);if(!el)return;el.value=Math.max(1,(parseInt(el.value)||1)+d);coEff();}
 function coEff(){var pb=(PB_MATCH||[]);var ta=0,tx=0;for(var i=0;i<pb.length;i++){var alw=Number(pb[i].allowance_min||0);var qel=$("#piqty"+i),mel=$("#pimin"+i),eel=$("#pieff"+i),rel=$("#pirsn"+i);if(!mel||!eel)continue;var qty=Math.max(1,parseInt(qel&&qel.value)||1);var act=Number(mel.value)||0;var allow=alw*qty;if(allow>0&&act>0){var e=Math.round(allow/act*100);eel.textContent=e+"%";eel.className="effb "+(e>=100?"good":e>=70?"ok":"bad");ta+=allow;tx+=act;if(rel)rel.style.display=(act>allow)?"":"none";}else{eel.textContent="—";eel.className="effb";if(rel)rel.style.display="none";}}var tel=$("#coTotalEff");if(tel){if(ta>0&&tx>0){var te=Math.round(ta/tx*100);tel.textContent="Total "+te+"%";tel.className="effb tot "+(te>=100?"good":te>=70?"ok":"bad");}else{tel.textContent="—";tel.className="effb tot";}}}
+var CO_ITEMS=[];
 async function finishJob(btn){
  var pb=(PB_MATCH||[]);var items=[];var missing=[];
  for(var i=0;i<pb.length;i++){var loc=($("#piloc"+i)||{}).value||"";var min=($("#pimin"+i)||{}).value||"";var qty=Math.max(1,parseInt(($("#piqty"+i)||{}).value)||1);
@@ -875,11 +876,23 @@ async function finishJob(btn){
  if(!$("#coPhoto").checked){toast("Confirm photos are attached");return;}
  var reqLeft=CHECK.filter(function(t){return t.required&&t.status!=='done'}).map(function(t){return t.label});
  if(reqLeft.length){if(!confirm(reqLeft.length+" required step(s) still open:\n\n• "+reqLeft.join("\n• ")+"\n\nClose anyway?"))return;}
+ CO_ITEMS=items;
+ btn.disabled=true;btn.textContent="Preparing invoice…";
+ var desc="";try{var dr=await sb.functions.invoke("app-invoice-prep",{body:{items:items}});if(dr.data&&dr.data.ok)desc=dr.data.description||"";}catch(e){}
+ btn.disabled=false;btn.textContent="Confirm work & efficiency";
+ var el=$("#closeAI");
+ el.innerHTML='<div class="kicker" style="margin:4px 2px 6px">Invoice description — check &amp; edit</div><div class="muted" style="font-size:12px;margin-bottom:8px">What the customer sees on their invoice. Fix anything, then send.</div><textarea id="coDesc" style="width:100%;min-height:130px;padding:11px;border:1px solid var(--sand-200,#d9cfc2);border-radius:10px;font-size:13.5px;box-sizing:border-box;font-family:inherit">'+esc(desc)+'</textarea><button class="btn btn-primary" style="margin-top:12px" onclick="coSendJob(this)"><svg class="ic" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Approve &amp; send to Simpro</button><button class="btn btn-ghost" style="margin-top:10px" onclick="renderCloseAI()">Back to items</button>';
+ if(el.scrollIntoView)el.scrollIntoView({behavior:"smooth"});
+}
+async function coSendJob(btn){
+ var desc=(($("#coDesc")||{}).value||"").trim();
  btn.disabled=true;btn.textContent="Sending…";
- var r=await qRpc("app_save_closeout",{p_job_id:CURRENT_JOB,p_transcript:CO_TR||null,p_testing:true,p_photos:true,p_items:items,p_materials:[]},"closeout");
- btn.disabled=false;
- if(!r.ok){toast("Couldn't save close-out");return;}if(r.queued){closeSheet();toast("✅ Saved offline — syncs when back online");CO_TR="";CO_RES=null;return;}
- try{await sb.functions.invoke("app-invoice-prep",{body:{jobId:CURRENT_JOB}});}catch(e){}try{sb.functions.invoke("app-simpro-push",{body:{jobId:CURRENT_JOB,dryRun:false,pushPhotos:true,pushDescription:true,pushPrebuilds:true}});}catch(e){}closeSheet();toast("✅ Closed out · sent to Simpro");CO_TR="";CO_RES=null;if(CURRENT_JOB)loadChecklist();
+ var r=await qRpc("app_save_closeout",{p_job_id:CURRENT_JOB,p_transcript:CO_TR||null,p_testing:true,p_photos:true,p_items:CO_ITEMS,p_materials:[]},"closeout");
+ if(!r.ok){btn.disabled=false;btn.textContent="Approve & send to Simpro";toast("Couldn't save close-out");return;}
+ if(r.queued){closeSheet();toast("✅ Saved offline — syncs when back online");CO_TR="";CO_RES=null;CO_ITEMS=[];return;}
+ try{await sb.functions.invoke("app-invoice-prep",{body:{jobId:CURRENT_JOB,description:desc}});}catch(e){}
+ try{sb.functions.invoke("app-simpro-push",{body:{jobId:CURRENT_JOB,dryRun:false,pushPhotos:true,pushDescription:true,pushPrebuilds:true}});}catch(e){}
+ closeSheet();toast("✅ Closed out · sent to Simpro");CO_TR="";CO_RES=null;CO_ITEMS=[];if(CURRENT_JOB)loadChecklist();
 }
 
 // init
