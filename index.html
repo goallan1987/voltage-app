@@ -533,7 +533,7 @@ h1,h2,h3,h4{font-family:var(--fd);font-weight:800;letter-spacing:-.02em;line-hei
     <div class="card"><div class="faint" style="font-size:12.5px;margin-bottom:10px">Learner shows the full process. Veteran shows summary reminders only.</div><div class="modetog" id="meModeTog"><button data-m="learner" onclick="setMode('learner')">Learner</button><button data-m="veteran" onclick="setMode('veteran')">Veteran</button></div></div>
     <div class="card" id="meAdminCard" style="display:none;margin-top:12px"><div class="between" style="cursor:pointer" onclick="go('admin')"><span style="font-size:14px;font-weight:600">&#128737; Admin &middot; team usage &amp; view-as</span><svg class="ic faint" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div></div>
     <button class="btn btn-ghost" style="margin-top:18px" onclick="signOut()">Sign out</button>
-    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.3 (9 Jun)</p>
+    <p style="text-align:center;color:var(--text-faint,#888);font-size:12px;margin-top:16px">Voltage &middot; Response Electricians &middot; v1.4 (9 Jun)</p>
   </div>
 </section>
 
@@ -879,7 +879,7 @@ async function finishJob(btn){
  var r=await qRpc("app_save_closeout",{p_job_id:CURRENT_JOB,p_transcript:CO_TR||null,p_testing:true,p_photos:true,p_items:items,p_materials:[]},"closeout");
  btn.disabled=false;
  if(!r.ok){toast("Couldn't save close-out");return;}if(r.queued){closeSheet();toast("✅ Saved offline — syncs when back online");CO_TR="";CO_RES=null;return;}
- try{sb.functions.invoke("app-simpro-push",{body:{jobId:CURRENT_JOB,dryRun:false,pushMaterials:false,pushPhotos:true}});}catch(e){}closeSheet();toast("✅ Closed out · synced");CO_TR="";CO_RES=null;if(CURRENT_JOB)loadChecklist();
+ try{sb.functions.invoke("app-simpro-push",{body:{jobId:CURRENT_JOB,dryRun:false,pushMaterials:false,pushPhotos:true}});}catch(e){}try{sb.functions.invoke("app-invoice-prep",{body:{jobId:CURRENT_JOB}});}catch(e){}closeSheet();toast("✅ Closed out · synced");CO_TR="";CO_RES=null;if(CURRENT_JOB)loadChecklist();
 }
 
 // init
